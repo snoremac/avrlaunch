@@ -1,0 +1,14 @@
+#ifndef AVRLAUNCH_ADC_EVENT_TEST_H
+#define AVRLAUNCH_ADC_EVENT_TEST_H
+
+void adc_event_test_set_up(void);
+void adc_event_test_tear_down(void);
+
+void test_should_register_event_source_when_listener_added(void);
+void test_should_deregister_event_source_when_listener_removed(void);
+#ifdef BOARD_mock
+void test_should_not_raise_event_when_reading_changes_below_threshold(void);
+void test_should_raise_event_after_reading_changed_beyond_threshold(void);
+#endif
+
+#endif
