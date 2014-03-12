@@ -11,7 +11,8 @@ blink.hex : $(AVRLAUNCH_HOME)/examples/blink/blink.hex
 fade.hex : $(AVRLAUNCH_HOME)/examples/fade/fade.hex
 
 $(AVRLAUNCH_HOME)/examples/%.elf : $(AVRLAUNCH_HOME)/examples/%.o $(AVRLAUNCH_SRC)/avrlaunch.a
-	$(CC) $(DEFAULT_LDFLAGS) $(LDFLAGS) -o $@ $^
+	# Position of LDFLAGS matters for correct linking of libm
+	$(CC) -o $@ $^ $(DEFAULT_LDFLAGS) $(LDFLAGS)
 	ln -sf $@ firmware.elf
 
 .PHONY: examples-clean

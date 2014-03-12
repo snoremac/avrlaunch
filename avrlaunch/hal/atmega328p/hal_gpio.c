@@ -1,4 +1,4 @@
-
+#include <math.h>
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -66,9 +66,9 @@ void gpio_shift_out(const gpio* data_gpio, const gpio* clock_gpio, uint8_t byte)
 	}
 }
 
-void gpio_set_duty_cycle(const gpio_timer* gpio_timer, uint16_t duty_cycle) {
-  *gpio_timer->output_compare_low = low_byte(duty_cycle);
-  if (not_null(gpio_timer->output_compare_high)) {
-    *gpio_timer->output_compare_high = high_byte(duty_cycle);    
-  }
+void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t percentage) {
+  // Assumes 8 bit PWM, and that compare match is in inverting mode
+  uint8_t duty_cycle = 255 - round((percentage * 255) / 100.0);
+  *gpio_timer->output_compare_low = duty_cycle;
 }
+

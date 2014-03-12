@@ -15,7 +15,8 @@ test.hex : $(AVRLAUNCH_SRC)/test/test.hex
 $(AVRLAUNCH_SRC)/test/test.elf : CFLAGS += $(addprefix -DTEST_, $(modules)) -DAVRLAUNCH_OVERRIDE_DEFS
 $(AVRLAUNCH_SRC)/test/test.elf : INCLUDES += -I$(AVRLAUNCH_SRC)/test
 $(AVRLAUNCH_SRC)/test/test.elf : $(avrlaunch_obj) $(unity_obj) $(test_obj) $(AVRLAUNCH_SRC)/avrlaunch.a 	
-	$(CC) $(DEFAULT_LDFLAGS) $(LDFLAGS) -o $@ $^ 
+	# Position of LDFLAGS matters for correct linking of libm
+	$(CC) -o $@ $^ $(DEFAULT_LDFLAGS) $(LDFLAGS)
 	ln -sf $@ firmware.elf  
 
 .PHONY: test-clean

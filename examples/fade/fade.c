@@ -45,7 +45,7 @@ void setup_task(struct task* task) {
 	configure_timer();
 
 	gpio_set_output(&led_gpio);		
-	gpio_set_duty_cycle(&led_gpio_timer, 0);
+	gpio_set_duty_cycle_percentage(&led_gpio_timer, 0);
 
 	gpio_event_add_listener(&button_gpio, button_event_handler);
 
@@ -65,8 +65,8 @@ void configure_timer() {
   set_bit(&TCCR0A, WGM01);
   clear_bit(&TCCR0B, WGM02);
 
-  // Enable output compare A, non-inverting mode
-  clear_bit(&TCCR0A, COM0A0);
+  // Enable output compare A, inverting mode
+  set_bit(&TCCR0A, COM0A0);
   set_bit(&TCCR0A, COM0A1);
 }
 
@@ -76,30 +76,30 @@ static void start_fade() {
 }
 
 static void stop_fade() {
-  struct task_config config = { "loff", TASK_FOREVER, 10 };
+  struct task_config config = { "loff", TASK_FOREVER, 20 };
 	light_off_task_id = scheduler_add_task(&config, light_off_task, NULL);
 	fade_on = false;
 }
 
 static void start_fade_up() {
-  struct task_config config = { "brup", TASK_FOREVER, 10 };
+  struct task_config config = { "brup", TASK_FOREVER, 20 };
 	brightness_up_task_id = scheduler_add_task(&config, brightness_up_task, NULL);
 }
 
 static void start_fade_down() {
-  struct task_config config = { "brdn", TASK_FOREVER, 10 };
+  struct task_config config = { "brdn", TASK_FOREVER, 20 };
 	brightness_down_task_id = scheduler_add_task(&config, brightness_down_task, NULL);
 }
 
 static void set_brightness(uint8_t brightness) {
-	gpio_set_duty_cycle(&led_gpio_timer, brightness);			
+	gpio_set_duty_cycle_percentage(&led_gpio_timer, brightness);			
 }
 
 static void brightness_up_task(struct task* task) {
 	brightness += 5;
 	set_brightness(brightness);
 
-	if (brightness == 255) {
+	if (brightness == 100) {
 		scheduler_remove_task(task->id);
 		start_fade_down();
 	}

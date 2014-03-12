@@ -30,6 +30,6 @@ void gpio_toggle(const gpio* gpio);
 
 void gpio_shift_out(const gpio* data_gpio, const gpio* clock_gpio, uint8_t byte);
 
-void gpio_set_duty_cycle(const gpio_timer* gpio_timer, uint16_t duty_cycle);
+void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t percentage);
 
 #endif
