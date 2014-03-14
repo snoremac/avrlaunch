@@ -45,6 +45,7 @@ void setup_task(struct task* task) {
 	configure_timer();
 
 	gpio_set_output(&led_gpio);		
+	gpio_connect_timer_non_inverting(&led_gpio_timer);
 	gpio_set_duty_cycle_percentage(&led_gpio_timer, 0);
 
 	gpio_event_add_listener(&button_gpio, button_event_handler);
@@ -64,10 +65,6 @@ void configure_timer() {
   set_bit(&TCCR0A, WGM00);
   set_bit(&TCCR0A, WGM01);
   clear_bit(&TCCR0B, WGM02);
-
-  // Enable output compare A, inverting mode
-  set_bit(&TCCR0A, COM0A0);
-  set_bit(&TCCR0A, COM0A1);
 }
 
 static void start_fade() {

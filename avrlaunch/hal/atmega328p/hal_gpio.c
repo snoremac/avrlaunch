@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -7,6 +8,8 @@
 #include "avrlaunch/log.h"
 #include "avrlaunch/pgmspace/pgm_strings.h"
 #include "avrlaunch/hal/hal_gpio.h"
+
+static bool is_gpio_timer_inverting(const gpio_timer* gpio_timer);
 
 event_descriptor gpio_to_descriptor(const gpio* gpio) {
   uint16_t port_address = (uint16_t) gpio->data;
@@ -66,9 +69,33 @@ void gpio_shift_out(const gpio* data_gpio, const gpio* clock_gpio, uint8_t byte)
 	}
 }
 
-void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t percentage) {
-  // Assumes 8 bit PWM, and that compare match is in inverting mode
-  uint8_t duty_cycle = 255 - round((percentage * 255) / 100.0);
+void gpio_connect_timer_non_inverting(const gpio_timer* gpio_timer) {
+  gpio_disconnect_timer(gpio_timer);
+  *gpio_timer->timer_control |= gpio_timer->output_compare_non_inverting;
+}
+
+void gpio_connect_timer_inverting(const gpio_timer* gpio_timer) {
+  gpio_disconnect_timer(gpio_timer);
+  *gpio_timer->timer_control |= gpio_timer->output_compare_inverting;
+}
+
+void gpio_disconnect_timer(const gpio_timer* gpio_timer) {
+  *gpio_timer->timer_control &= gpio_timer->output_compare_off;
+}
+
+// Assumes 8 bit PWM
+void gpio_set_duty_cycle(const gpio_timer* gpio_timer, uint8_t duty_cycle) {
+  if (is_gpio_timer_inverting(gpio_timer)) {
+    duty_cycle = 255 - duty_cycle;
+  }
   *gpio_timer->output_compare_low = duty_cycle;
+}
+
+void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t duty_cycle_percentage) {
+  gpio_set_duty_cycle(gpio_timer, round((duty_cycle_percentage * 255) / 100.0));
+}
+
+static bool is_gpio_timer_inverting(const gpio_timer* gpio_timer) {
+  return (*gpio_timer->timer_control & ~gpio_timer->output_compare_off) == gpio_timer->output_compare_inverting;
 }
 
