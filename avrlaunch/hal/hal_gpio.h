@@ -36,8 +36,8 @@ void gpio_connect_timer_inverting(const gpio_timer* gpio_timer);
 
 void gpio_disconnect_timer(const gpio_timer* gpio_timer);
 
-void gpio_set_duty_cycle(const gpio_timer* gpio_timer, uint8_t duty_cycle);
+void gpio_set_output_compare(const gpio_timer* gpio_timer, uint8_t output_compare);
 
-void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t duty_cycle_percentage);
+void gpio_set_output_compare_percentage(const gpio_timer* gpio_timer, uint8_t output_compare_percentage);
 
 #endif

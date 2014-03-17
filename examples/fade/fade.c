@@ -46,7 +46,7 @@ void setup_task(struct task* task) {
 
 	gpio_set_output(&led_gpio);		
 	gpio_connect_timer_non_inverting(&led_gpio_timer);
-	gpio_set_duty_cycle_percentage(&led_gpio_timer, 0);
+	gpio_set_output_compare_percentage(&led_gpio_timer, 0);
 
 	gpio_event_add_listener(&button_gpio, button_event_handler);
 
@@ -89,7 +89,7 @@ static void start_fade_down() {
 }
 
 static void set_brightness(uint8_t brightness) {
-	gpio_set_duty_cycle_percentage(&led_gpio_timer, brightness);			
+	gpio_set_output_compare_percentage(&led_gpio_timer, brightness);			
 }
 
 static void brightness_up_task(struct task* task) {

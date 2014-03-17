@@ -84,15 +84,15 @@ void gpio_disconnect_timer(const gpio_timer* gpio_timer) {
 }
 
 // Assumes 8 bit PWM
-void gpio_set_duty_cycle(const gpio_timer* gpio_timer, uint8_t duty_cycle) {
+void gpio_set_output_compare(const gpio_timer* gpio_timer, uint8_t output_compare) {
   if (is_gpio_timer_inverting(gpio_timer)) {
-    duty_cycle = 255 - duty_cycle;
+    output_compare = 255 - output_compare;
   }
-  *gpio_timer->output_compare_low = duty_cycle;
+  *gpio_timer->output_compare_low = output_compare;
 }
 
-void gpio_set_duty_cycle_percentage(const gpio_timer* gpio_timer, uint8_t duty_cycle_percentage) {
-  gpio_set_duty_cycle(gpio_timer, round((duty_cycle_percentage * 255) / 100.0));
+void gpio_set_output_compare_percentage(const gpio_timer* gpio_timer, uint8_t output_compare_percentage) {
+  gpio_set_output_compare(gpio_timer, round((output_compare_percentage * 255) / 100.0));
 }
 
 static bool is_gpio_timer_inverting(const gpio_timer* gpio_timer) {
