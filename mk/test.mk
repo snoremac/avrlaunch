@@ -1,4 +1,4 @@
-TEST ?= SCHEDULER,SHELL,EVENT,ADC_EVENT,GPIO_EVENT,
+TEST ?= BUFFER,SCHEDULER,SHELL,EVENT,ADC_EVENT,GPIO_EVENT,
 
 test_src = $(wildcard $(AVRLAUNCH_SRC)/test/*.c)
 test_obj = $(test_src:.c=.o)

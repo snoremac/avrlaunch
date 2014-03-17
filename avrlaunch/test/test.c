@@ -11,6 +11,7 @@
 #include "avrlaunch/pgmspace/pgm_strings.h"
 
 #include "avrlaunch/test/test.h"
+#include "avrlaunch/test/buffer_test.h"
 #include "avrlaunch/test/scheduler_test.h"
 #include "avrlaunch/test/shell_test.h"
 #include "avrlaunch/test/event_test.h"
@@ -50,6 +51,17 @@ void tearDown() {
 
 uint8_t test_run() {
 	UnityBegin();
+
+#ifdef TEST_BUFFER
+  PGM_STR(BUFFER_TEST_PATH, buffer_test_path)
+	Unity.TestFile = buffer_test_path;
+	set_up_func = buffer_test_set_up;
+	tear_down_func = buffer_test_tear_down;
+	RUN_TEST(test_should_add_to_fixed_buffer, 0);
+	RUN_TEST(test_should_add_to_circular_buffer, 0);
+	RUN_TEST(test_fixed_buffer_exceeds_size, 0);
+	RUN_TEST(test_circular_buffer_exceeds_size, 0);
+#endif
 
 #ifdef TEST_SCHEDULER
   PGM_STR(SCHEDULER_TEST_PATH, scheduler_test_path)
