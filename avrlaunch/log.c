@@ -3,14 +3,15 @@
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/log.h"
+#include "avrlaunch/shell.h"
 #include "avrlaunch/hal/hal_gpio.h"
 #include "avrlaunch/pgmspace/pgm_strings.h"
 
 void LOG(const char* level, const char* format, ...) {
-  printf("[%s] ", level);
+  fprintf(shell_get_stream(), "[%s] ", level);
 	va_list args;
 	va_start(args, format);
-	vprintf(format, args);
+	vfprintf(shell_get_stream(), format, args);
 	va_end(args);
 }
 
