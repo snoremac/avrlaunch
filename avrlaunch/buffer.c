@@ -1,65 +1,86 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 #include <avr/eeprom.h>
 
 #include "avrlaunch/buffer.h"
+#include "avrlaunch/log.h"
 
-void buffer_init(struct buffer* buffer, uint8_t* slots, const uint16_t size, buffer_mode mode) {
-    buffer->size = size;
-    buffer->start = 0;
-    buffer->count = 0;
-    buffer->slots = slots;
+typedef void (*element_print_handler)(struct buffer* buffer, uint16_t pos, FILE* stream);
+
+static void* buffer_at(struct buffer* buffer, uint16_t pos);
+static void buffer_dump(struct buffer* buffer, element_print_handler handler, FILE* stream);
+static void print_uint8(struct buffer* buffer, uint16_t pos, FILE* stream);
+static void print_uint16(struct buffer* buffer, uint16_t pos, FILE* stream);
+
+void buffer_init(struct buffer* buffer, void* data, const uint16_t max_elements, const uint16_t element_size, buffer_mode mode) {
+    buffer->data = data;
+    buffer->max_elements = max_elements;
+    buffer->element_size = element_size;
     buffer->mode = mode;
+
+    memset(data, 0, max_elements * element_size);
+    buffer->start_element = 0;
+    buffer->element_count = 0;
 }
  
-void buffer_push(struct buffer* buffer, const uint8_t value) {
-  uint16_t end = (buffer->start + buffer->count) % buffer->size;
-  
-  if (buffer->count < buffer->size || buffer->mode == BUFFER_CIRCULAR) {
-    buffer->slots[end] = value;
+void buffer_push(struct buffer* buffer, const void* value) {
+  uint16_t next_element = (buffer->start_element + buffer->element_count) % buffer->max_elements;
+  if (buffer->element_count < buffer->max_elements || buffer->mode == BUFFER_CIRCULAR) {
+    memcpy(buffer->data + (next_element * buffer->element_size), value, buffer->element_size);
   }
 
-  if (buffer->count == buffer->size) {
+  if (buffer->element_count == buffer->max_elements) {
     if (buffer->mode == BUFFER_CIRCULAR) {
-      buffer->start = (buffer->start + 1) % buffer->size;            
+      buffer->start_element = (buffer->start_element + 1) % buffer->max_elements;
     }
   } else {
-    buffer->count++;
+    buffer->element_count++;
   }
 }
 
-uint8_t buffer_at(struct buffer* buffer, uint16_t pos) {
-  uint16_t real_pos = (buffer->start + pos) % buffer->size;
-  return buffer->slots[real_pos];
+static void* buffer_at(struct buffer* buffer, uint16_t pos) {
+  uint16_t real_pos = (buffer->start_element + pos) % buffer->max_elements;
+  return (buffer->data + (real_pos * buffer->element_size));
 }
 
-void buffer_load(struct buffer* buffer, uint16_t pos) {
-  eeprom_busy_wait();
-  uint16_t length = eeprom_read_word((uint16_t*) pos);
-  pos += 2;
-  
-  for (uint16_t i = 0; i < length; i++) {
-    eeprom_busy_wait();  
-    buffer_push(buffer, eeprom_read_byte((uint8_t*) pos + i));
-  }
+uint8_t buffer_uint8_at(struct buffer* buffer, uint16_t pos) {
+  return *((uint8_t*) buffer_at(buffer, pos));
 }
 
-void buffer_save(struct buffer* buffer, uint16_t pos) {
-  eeprom_busy_wait();
-  eeprom_update_word((uint16_t*) pos, buffer->count);
-  pos += 2;
-  
-  for (uint16_t i = 0; i < buffer->count; i++) {
-    eeprom_busy_wait();  
-    eeprom_update_byte((uint8_t*) pos + i, buffer_at(buffer, i));
-  }
+int8_t buffer_int8_at(struct buffer* buffer, uint16_t pos) {
+  return *((int8_t*) buffer_at(buffer, pos));
 }
 
-void buffer_dump(struct buffer* buffer, FILE* stream) {
-  for (uint16_t i = 0; i < buffer->count; i++) {
-    fprintf(stream, "%u", buffer_at(buffer, i));
-    if (i + 1 < buffer->count) {
+uint16_t buffer_uint16_at(struct buffer* buffer, uint16_t pos) {
+  return *((uint16_t*) buffer_at(buffer, pos));
+}
+
+int16_t buffer_int16_at(struct buffer* buffer, uint16_t pos) {
+  return *((int16_t*) buffer_at(buffer, pos));
+}
+
+void buffer_dump_uint8(struct buffer* buffer, FILE* stream) {
+  buffer_dump(buffer, print_uint8, stream);
+}
+
+void buffer_dump_uint16(struct buffer* buffer, FILE* stream) {
+  buffer_dump(buffer, print_uint16, stream);
+}
+
+static void print_uint8(struct buffer* buffer, uint16_t pos, FILE* stream) {
+  fprintf(stream, "%u", buffer_uint8_at(buffer, pos));
+}
+
+static void print_uint16(struct buffer* buffer, uint16_t pos, FILE* stream) {
+  fprintf(stream, "%u", buffer_uint16_at(buffer, pos));
+}
+
+static void buffer_dump(struct buffer* buffer, element_print_handler handler, FILE* stream) {
+  for (uint16_t i = 0; i < buffer->element_count; i++) {
+    handler(buffer, i, stream);
+    if (i + 1 < buffer->element_count) {
       fputc(',', stream);      
     }
     if ((i + 1) % 25 == 0) {

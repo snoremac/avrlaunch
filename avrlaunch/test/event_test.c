@@ -1,5 +1,3 @@
-#define UNITY_FIXTURE_MALLOC_OVERRIDES_H_
-
 #include <stdlib.h>
 
 #include "unity.h"

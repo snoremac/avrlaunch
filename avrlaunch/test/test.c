@@ -1,5 +1,3 @@
-#define INPUT_BUF_SIZE 20
-
 #include <string.h>
 #include <avr/interrupt.h>
 
@@ -57,10 +55,15 @@ uint8_t test_run() {
 	Unity.TestFile = buffer_test_path;
 	set_up_func = buffer_test_set_up;
 	tear_down_func = buffer_test_tear_down;
-	RUN_TEST(test_should_add_to_fixed_buffer, 0);
-	RUN_TEST(test_should_add_to_circular_buffer, 0);
-	RUN_TEST(test_fixed_buffer_exceeds_size, 0);
-	RUN_TEST(test_circular_buffer_exceeds_size, 0);
+	RUN_TEST(test_add_fixed_uint8, 0);
+	RUN_TEST(test_add_circular_uint8, 0);
+	RUN_TEST(test_overflow_fixed_uint8, 0);
+	RUN_TEST(test_overflow_circular_uint8, 0);
+	RUN_TEST(test_add_fixed_uint16, 0);
+	RUN_TEST(test_add_circular_uint16, 0);
+	RUN_TEST(test_overflow_fixed_uint16, 0);
+	RUN_TEST(test_overflow_circular_uint16, 0);
+	RUN_TEST(test_unused_elements_are_zero, 0);
 #endif
 
 #ifdef TEST_SCHEDULER
