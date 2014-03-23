@@ -51,4 +51,5 @@ program :
 
 .PHONY: program-sim
 program-sim :
-	simavr firmware.elf
+	make -C $(AVRLAUNCH_HOME)/sim sim-basic
+	$(AVRLAUNCH_HOME)/sim/sim-basic firmware.elf
