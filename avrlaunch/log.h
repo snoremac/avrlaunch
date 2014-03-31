@@ -41,8 +41,6 @@
     
 void LOG(const char* level, const char* format, ...);
 
-void log_error_malloc(void);
-
 void set_system_warning(void);
 
 void clear_system_warning(void);

@@ -46,4 +46,3 @@ adc_event_test_path: "src/test/adc_event_test.c"
 gpio_event_test_path: "src/test/gpio_event_test.c"
 
 task_setup: "setup"
-error_malloc: "Failed to allocate memory."

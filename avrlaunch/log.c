@@ -15,13 +15,6 @@ void LOG(const char* level, const char* format, ...) {
 	va_end(args);
 }
 
-void log_error_malloc() {
-	if (LOG_LEVEL >= LOG_LEVEL_ERROR) {
-    PGM_STR(ERROR_MALLOC, failed_msg);
-		LOG_ERROR(failed_msg, "");
-	}
-}
-
 void set_system_warning() {
   gpio_set_output(&GPIO(PORTB, PIN5));
   gpio_write_high(&GPIO(PORTB, PIN5));
