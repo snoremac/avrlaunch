@@ -51,5 +51,5 @@ program :
 
 .PHONY: program-sim
 program-sim :
-	make -C $(AVRLAUNCH_HOME)/sim sim-basic
-	$(AVRLAUNCH_HOME)/sim/sim-basic firmware.elf
+	make -C $(AVRLAUNCH_HOME)/sim sim
+	$(AVRLAUNCH_HOME)/sim/sim firmware.elf

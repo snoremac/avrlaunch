@@ -9,3 +9,4 @@ build
 doc
 tty.mcu
 sim/sim-basic
+sim/sim
