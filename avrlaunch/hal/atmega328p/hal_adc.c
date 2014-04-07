@@ -11,7 +11,7 @@
 
 #define NO_DUMMY -1
 
-static uint8_t dummy_channel = NO_DUMMY;
+static int8_t dummy_channel = NO_DUMMY;
 
 static void error_not_adc_channel(const uint8_t channel);
 static shell_result adc_shell_handler(shell_command* command);
@@ -90,11 +90,15 @@ static shell_result adc_shell_handler(shell_command* command) {
 	
   if (string_eq(command->args[0], "read")) {
     shell_printf("Channel\tReading\n");
-    for (int i = 0; i < 6; i++) {
-  		shell_printf("%u\t%u\n", i, adc_read(i));
-    }
-		return SHELL_RESULT_SUCCESS;
+  	if (command->args_count == 2) {
+  		uint8_t channel = atoi(command->args[1]);
+    	shell_printf("%u\t%u\n", channel, adc_read(channel));
+  	} else {
+      for (int i = 0; i < 6; i++) {
+      	shell_printf("%u\t%u\n", i, adc_read(i));
+      }
+  	}
+  	return SHELL_RESULT_SUCCESS;
 	}
-
 	return SHELL_RESULT_FAIL;
 }
