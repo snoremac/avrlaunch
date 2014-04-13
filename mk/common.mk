@@ -41,13 +41,15 @@
 
 .PHONY: program
 program :
-	$(AVRLAUNCH_HOME)/bin/kill_minicom.sh
-	
 	# Via USB + bootloader
+	$(AVRLAUNCH_HOME)/bin/kill_minicom.sh
 	avrdude -F -D -C $(AVR_CONF) -p $(MCU) -P $(AVRLAUNCH_HOME)/tty.mcu -c stk500v1 -b 115200 -U flash:w:firmware.hex:i
 
 	# Via AVR ISP mkII
 	# avrdude -C $(AVR_CONF) -p $(MCU) -P usb:000200071799 -c avrispmkii -U flash:w:firmware.hex:i
+
+	# Via USBasp
+	# avrdude -C $(AVR_CONF) -p $(MCU) -c usbasp -U flash:w:firmware.hex:i
 
 .PHONY: program-sim
 program-sim :

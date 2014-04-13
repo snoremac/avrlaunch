@@ -2,6 +2,7 @@ export AVRLAUNCH_HOME = .
 export AVRLAUNCH_SRC = $(AVRLAUNCH_HOME)/avrlaunch
 export AVRLAUNCH_BUILD = $(AVRLAUNCH_HOME)/build
 export UNITY_SRC = $(AVRLAUNCH_HOME)/unity
+export ARDUINO_HOME = $(HOME)/software/arduino
 
 .PHONY: all debug
 all : avrlaunch test examples
@@ -35,6 +36,10 @@ $(AVRLAUNCH_BUILD)/avrlaunch/pgmspace/pgm_strings.o : $(AVRLAUNCH_BUILD)/avrlaun
 $(AVRLAUNCH_BUILD)/avrlaunch/pgmspace/pgm_strings.% : avrlaunch/pgmspace/pgm_strings.%.erb
 	mkdir -p $(AVRLAUNCH_BUILD)/avrlaunch/pgmspace
 	erb -r yaml $< > $@
+
+.PHONY: program-bootloader
+program-bootloader:
+	make -C $(ARDUINO_HOME)/hardware/arduino/bootloaders/optiboot ISPTOOL=usbasp atmega328_isp
 
 include mk/unity.mk
 include mk/test.mk
