@@ -3,7 +3,6 @@
 #include <avr/pgmspace.h>
 
 #include "avrlaunch/avrlaunch.h"
-#include "avrlaunch/buffer.h"
 #include "avrlaunch/shell.h"
 #include "avrlaunch/wave.h"
 #include "avrlaunch/hal/hal_gpio.h"
@@ -75,16 +74,16 @@ void wave_on(waveform_type waveform, float hertz) {
   gpio_set_output_compare(&wave_gpio_timer, 0);
   gpio_connect_timer_non_inverting(&wave_gpio_timer);
 
-  // Enable interrupt 
+  // Enable interrupt
   set_bit(&TIMSK2, TOIE2);
 
-  sei();    
+  sei();
 }
 
 void wave_off() {
   gpio_disconnect_timer(&wave_gpio_timer);
 
-  // Disable interrupt 
+  // Disable interrupt
   clear_bit(&TIMSK2, TOIE2);
 }
 
@@ -122,8 +121,3 @@ static void configure_timer() {
   clear_bit(&TCCR2A, WGM21);
   clear_bit(&TCCR2B, WGM22);
 }
-
-
-
-
-

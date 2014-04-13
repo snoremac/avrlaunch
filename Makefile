@@ -13,7 +13,11 @@ include mk/common.mk
 override INCLUDES += -I. -I$(AVRLAUNCH_HOME) -I$(AVRLAUNCH_BUILD)
 override INCLUDES += -I$(UNITY_SRC) -I$(AVR_PREFIX)/include
 
-avrlaunch_src = $(wildcard $(AVRLAUNCH_SRC)/*.c) $(wildcard $(AVRLAUNCH_SRC)/hal/$(MCU)/*.c) $(wildcard $(AVRLAUNCH_SRC)/event/*.c)
+avrlaunch_src = $(wildcard $(AVRLAUNCH_SRC)/*.c) \
+	$(wildcard $(AVRLAUNCH_SRC)/buffer/*.c) \
+	$(wildcard $(AVRLAUNCH_SRC)/hal/$(MCU)/*.c) \
+	$(wildcard $(AVRLAUNCH_SRC)/event/*.c)
+
 avrlaunch_obj = $(AVRLAUNCH_BUILD)/avrlaunch/pgmspace/pgm_strings.o $(avrlaunch_src:.c=.o)
 
 # Empty SECONDARY stops intermediary files (e.g. %.elf, pgm_strings.c)
@@ -41,6 +45,5 @@ clean: test-clean examples-clean
 	rm -rf $(AVRLAUNCH_BUILD)
 	rm -f $(addprefix $(AVRLAUNCH_HOME)/, $(ARTIFACTS))
 	rm -f $(addprefix $(AVRLAUNCH_SRC)/, $(ARTIFACTS))
-	rm -f $(AVRLAUNCH_SRC)/hal/*.o $(AVRLAUNCH_SRC)/event/*.o $(AVRLAUNCH_SRC)/hal/$(MCU)/*.o $(AVRLAUNCH_SRC)/hal/mock/*.o
-
-
+	rm -f $(AVRLAUNCH_SRC)/buffer/*.o $(AVRLAUNCH_SRC)/hal/*.o
+	rm -f $(AVRLAUNCH_SRC)/event/*.o $(AVRLAUNCH_SRC)/hal/$(MCU)/*.o
