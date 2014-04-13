@@ -14,17 +14,17 @@ event_descriptor gpio_to_descriptor(const gpio* gpio);
 
 gpio gpio_from_descriptor(event_descriptor descriptor);
 
-void gpio_set_input(const gpio* gpio) __attribute__((always_inline));
+void gpio_set_input(const gpio* gpio);
 
-void gpio_set_output(const gpio* gpio) __attribute__((always_inline));
+void gpio_set_output(const gpio* gpio);
 
 logic_level gpio_read(const gpio* gpio);
 
 void gpio_write(const gpio* gpio, logic_level level);
 
-void gpio_write_low(const gpio* gpio) __attribute__((always_inline));
+void gpio_write_low(const gpio* gpio);
 
-void gpio_write_high(const gpio* gpio) __attribute__((always_inline));
+void gpio_write_high(const gpio* gpio);
 
 void gpio_toggle(const gpio* gpio);
 

@@ -33,13 +33,13 @@ typedef uint32_t time;
 
 typedef void (*error_callback)(const char* message);
 
-logic_level read_bit(volatile uint8_t *byte, uint8_t bit) __attribute__((always_inline));
+logic_level read_bit(volatile uint8_t *byte, uint8_t bit);
 
-void set_bit(volatile uint8_t *byte, uint8_t bit) __attribute__((always_inline));
+void set_bit(volatile uint8_t *byte, uint8_t bit);
 
-void toggle_bit(volatile uint8_t *byte, uint8_t bit) __attribute__((always_inline));
+void toggle_bit(volatile uint8_t *byte, uint8_t bit);
 
-void clear_bit(volatile uint8_t *byte, uint8_t bit) __attribute__((always_inline));
+void clear_bit(volatile uint8_t *byte, uint8_t bit);
 
 uint8_t high_byte(uint16_t word);
 
@@ -60,4 +60,3 @@ bool string_eq_i(const char* string_1, const char* string_2);
 void system_reset(void);
 
 #endif
-
