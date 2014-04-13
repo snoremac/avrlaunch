@@ -15,4 +15,6 @@ char uart_pollc(void);
 
 void uart_putc(char c);
 
+void uart_putc_raw(char c);
+
 #endif
