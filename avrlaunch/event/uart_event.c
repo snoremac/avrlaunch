@@ -21,7 +21,7 @@ static volatile uart_buffer buffer = {
 };
 
 static uart_char_event current_uart_char_event;
-  
+
 static event* uart_poll_handler(event_type type, event_descriptor descriptor);
 static char pop_uart_buffer(void);
 
@@ -40,20 +40,20 @@ ISR(USART_RX_vect) {
 }
 
 void uart_event_add_listener(event_handler handler) {
-  event_register_source(EVENT_TYPE_UART, EVENT_DESCRIPTOR_UART_RX, 50, uart_poll_handler);
-  event_add_listener(EVENT_TYPE_UART, EVENT_DESCRIPTOR_UART_RX, handler);
+  event_register_source(EVENT_TYPE_UART, 0, 50, uart_poll_handler);
+  event_add_listener(EVENT_TYPE_UART, 0, handler);
 }
 
 void uart_event_remove_listeners() {
-  event_remove_listeners(EVENT_TYPE_UART, EVENT_DESCRIPTOR_UART_RX);  
-	event_deregister_source(EVENT_TYPE_UART, EVENT_DESCRIPTOR_UART_RX);
+  event_remove_listeners(EVENT_TYPE_UART, 0);
+	event_deregister_source(EVENT_TYPE_UART, 0);
 }
 
 static event* uart_poll_handler(event_type type, event_descriptor descriptor) {
 	char c = pop_uart_buffer();
 	if (c != 0) {
     current_uart_char_event.super.type = EVENT_TYPE_UART;
-    current_uart_char_event.super.descriptor = EVENT_DESCRIPTOR_UART_RX;
+    current_uart_char_event.super.descriptor = 0;
     current_uart_char_event.uart_char = c;
 		return (event*) &current_uart_char_event;
 	}

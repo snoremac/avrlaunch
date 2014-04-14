@@ -5,7 +5,7 @@
 #include "avrlaunch/event/event.h"
 #include "avrlaunch/hal/hal_gpio.h"
 
-#define EVENT_TYPE_GPIO 0x01
+#define EVENT_TYPE_GPIO 1
 
 struct gpio_read {
 	logic_level current_state;

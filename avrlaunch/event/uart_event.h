@@ -5,8 +5,7 @@
 
 #include "avrlaunch/event/event.h"
 
-#define EVENT_TYPE_UART 0x02
-#define EVENT_DESCRIPTOR_UART_RX 0x01
+#define EVENT_TYPE_UART 2
 #define UART_BUFFER_SIZE 8
 
 typedef struct uart_char_event {

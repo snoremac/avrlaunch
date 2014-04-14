@@ -9,7 +9,7 @@
 
 #include "avrlaunch/test/event_test.h"
 
-#define EVENT_TYPE_TEST 0xFF
+#define EVENT_TYPE_TEST 255
 
 #define EVENT_DESCRIPTOR_TEST_A 0x01
 #define EVENT_DESCRIPTOR_TEST_B 0x02
