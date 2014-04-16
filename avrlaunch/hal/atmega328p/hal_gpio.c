@@ -11,25 +11,8 @@
 
 static bool is_gpio_timer_inverting(const gpio_timer* gpio_timer);
 
-event_descriptor gpio_to_descriptor(const gpio* gpio) {
-  uint16_t port_address = (uint16_t) gpio->data;
-  return (port_address << 8) | gpio->pin;
-}
-
-gpio gpio_from_descriptor(event_descriptor descriptor) {
-  // Relies on the relative memory addresses of the IO registers
-  // on the 328p.  Bad, mmkay.
-  uint8_t* port_address = (uint8_t*) (descriptor >> 8);
-  return (struct gpio) {
-    .input = port_address - 2,
-    .direction = port_address - 1,
-    .data = port_address,
-    .pin = descriptor & 0xff
-  };
-}
-
 void gpio_set_input(const gpio* gpio) {
-  *(gpio->direction) &= ~_BV(gpio->pin);    
+  *(gpio->direction) &= ~_BV(gpio->pin);
 }
 
 void gpio_set_output(const gpio* gpio) {
@@ -98,4 +81,3 @@ void gpio_set_output_compare_percentage(const gpio_timer* gpio_timer, uint8_t ou
 static bool is_gpio_timer_inverting(const gpio_timer* gpio_timer) {
   return (*gpio_timer->timer_control & ~gpio_timer->output_compare_off) == gpio_timer->output_compare_inverting;
 }
-

@@ -1,5 +1,5 @@
-#ifndef AVR_KIT_EVENT_EVENT_INTERNAL_H
-#define AVR_KIT_EVENT_EVENT_INTERNAL_H
+#ifndef AVRLAUNCH_EVENT_EVENT_INTERNAL_H
+#define AVRLAUNCH_EVENT_EVENT_INTERNAL_H
 
 #include <inttypes.h>
 #include <stdbool.h>
@@ -9,15 +9,14 @@
 
 typedef struct event_callable {
   bool active;
-	event_type type;
 	event_descriptor descriptor;
 } event_callable;
 
 typedef struct event_source {
 	event_callable super;
-	time poll_interval;
-	time next_scheduled_poll;
+	uint16_t poll_interval;
 	event_poll_handler poll_handler;
+  time next_scheduled_poll;
 } event_source;
 
 typedef struct event_listener {

@@ -1,5 +1,6 @@
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <avr/interrupt.h>
@@ -21,13 +22,13 @@ static event_source sources[EVENT_MAX_SOURCES];
 static event_listener listeners[EVENT_MAX_LISTENERS];
 
 static bool event_matches_listener(event* event, event_listener* listener);
-static bool is_same_source(event_source* source_a, event_type type_b, event_descriptor descriptor_b);
+static bool descriptors_equal(event_descriptor* descriptor_a, event_descriptor* descriptor_b);
 
-static bool source_registered(event_type type, event_descriptor descriptor);
-static result update_source(event_type type, event_descriptor descriptor, event_poll_handler poll_handler);
-static void warn_failed_add_source(event_type type, event_descriptor descriptor, result result);
+static bool source_registered(event_descriptor* descriptor);
+static void update_source(event_descriptor* descriptor, event_poll_handler poll_handler);
 
-static void warn_failed_add_listener(event_type type, event_descriptor descriptor, result result);
+static void warn_failed_add_source(event_descriptor* descriptor, result result);
+static void warn_failed_add_listener(event_descriptor* descriptor, result result);
 
 static shell_result shell_main_handler(shell_command* command);
 static shell_result shell_list_handler(char** args, uint8_t token_count);
@@ -48,13 +49,13 @@ void event_tick() {
 
 	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
 		if (!sources[i].super.active) continue;
-		
-		if (time_now >= sources[i].next_scheduled_poll) {
-      event* event = sources[i].poll_handler(sources[i].super.type, sources[i].super.descriptor);		  
-  		if (null(event)) continue;  
-      event_fire_event(event);
 
-    	sources[i].next_scheduled_poll = time_now + sources[i].poll_interval;	
+		if (time_now >= sources[i].next_scheduled_poll) {
+      event* event = sources[i].poll_handler(&sources[i].super.descriptor);
+  		if (null(event)) continue;
+
+      event_fire_event(event);
+    	sources[i].next_scheduled_poll = time_now + sources[i].poll_interval;
 		}
 	}
 }
@@ -74,107 +75,103 @@ void event_fire_event(event* event) {
 
 static bool event_matches_listener(event* event, event_listener* listener) {
 	return event != NULL && listener != NULL
-		&& event->type == listener->super.type && event->descriptor == listener->super.descriptor;
+			&& descriptors_equal(&event->descriptor, &listener->super.descriptor);
 }
 
-result event_register_source(event_type type, event_descriptor descriptor,
-    time poll_interval, event_poll_handler poll_handler) {
-	if (source_registered(type, descriptor)) {
-		update_source(type, descriptor, poll_handler);
-		return RESULT_SUCCESS;
+void event_register_source(event_descriptor descriptor, uint16_t poll_interval, event_poll_handler poll_handler) {
+	if (source_registered(&descriptor)) {
+		update_source(&descriptor, poll_handler);
+		return;
 	}
 
-	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {    
+	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
 		if (!sources[i].super.active) {
 			sources[i] = (event_source) {
 			  {
           .active = true,
-				  .type = type,
 				  .descriptor = descriptor
 			  },
         .poll_interval = poll_interval,
         .next_scheduled_poll = clock_get_time() + poll_interval,
 			  .poll_handler = poll_handler
 		  };
-			return RESULT_SUCCESS;
+			return;
     }
 	}
 
-	warn_failed_add_source(type, descriptor, RESULT_FAIL_CAPACITY);
-	return RESULT_FAIL_CAPACITY;
+	warn_failed_add_source(&descriptor, RESULT_FAIL_CAPACITY);
 }
 
-void event_deregister_source(event_type type, event_descriptor descriptor) {
+void event_deregister_source(event_descriptor descriptor) {
 	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
-		if (is_same_source(&sources[i], type, descriptor)) {
+		if (descriptors_equal(&sources[i].super.descriptor, &descriptor)) {
 			sources[i].super.active = false;
 		}
-	}	
-}
-
-static bool source_registered(event_type type, event_descriptor descriptor) {
-	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
-		if (is_same_source(&sources[i], type, descriptor)) {
-			return true;
-		}
-	}	
-	return false;
-}
-
-static bool is_same_source(event_source* source_a, event_type type_b, event_descriptor descriptor_b) {
-	return (source_a != NULL) && (source_a->super.active) && (source_a->super.type == type_b) && (source_a->super.descriptor == descriptor_b);
-}
-
-static result update_source(event_type type, event_descriptor descriptor, event_poll_handler poll_handler) {
-	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
-		if (is_same_source(&sources[i], type, descriptor)) {
-			sources[i].poll_handler = poll_handler;
-			return RESULT_SUCCESS;
-		}
-	}	
-	return RESULT_FAIL_MATCH;
-}
-
-static void warn_failed_add_source(event_type type, event_descriptor descriptor, result result) {
-  set_system_warning();
-	if (LOG_LEVEL >= LOG_LEVEL_WARN) {
-    PGM_STR(EVENT_SOURCE_FAILED_ADD, failed_msg)
-		LOG_WARN(failed_msg, type, descriptor, result);
 	}
 }
 
-result event_add_listener(event_type type, event_descriptor descriptor, event_handler handler) {
+static bool source_registered(event_descriptor* descriptor) {
+	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
+		if (sources[i].super.active && descriptors_equal(&sources[i].super.descriptor, descriptor)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool descriptors_equal(event_descriptor* descriptor_a, event_descriptor* descriptor_b) {
+	return (descriptor_a != NULL)
+			&& (descriptor_b != NULL)
+			&& (descriptor_a->category == descriptor_b->category)
+			&& (descriptor_a->address == descriptor_b->address);
+}
+
+static void update_source(event_descriptor* descriptor, event_poll_handler poll_handler) {
+	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
+		if (descriptors_equal(&sources[i].super.descriptor, descriptor)) {
+			sources[i].poll_handler = poll_handler;
+		}
+	}
+}
+
+static void warn_failed_add_source(event_descriptor* descriptor, result result) {
+  set_system_warning();
+	if (LOG_LEVEL >= LOG_LEVEL_WARN) {
+    PGM_STR(EVENT_SOURCE_FAILED_ADD, failed_msg)
+		LOG_WARN(failed_msg, descriptor->category, descriptor->address);
+	}
+}
+
+void event_add_listener(event_descriptor descriptor, event_handler handler) {
 	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
 		if (!listeners[i].super.active) {
 			listeners[i] = (event_listener) {
 			  {
           .active = true,
-				  .type = type,
-				  .descriptor = descriptor				
+				  .descriptor = descriptor
 			  },
 			  .handler = handler
 		  };
-			return RESULT_SUCCESS;
-		}		
+			return;
+		}
 	}
-  
-	warn_failed_add_listener(type, descriptor, RESULT_FAIL_CAPACITY);
-	return RESULT_FAIL_CAPACITY;
+
+	warn_failed_add_listener(&descriptor, RESULT_FAIL_CAPACITY);
 }
 
-static void warn_failed_add_listener(event_type type, event_descriptor descriptor, result result) {
+static void warn_failed_add_listener(event_descriptor* descriptor, result result) {
   set_system_warning();
 	if (LOG_LEVEL >= LOG_LEVEL_WARN) {
     PGM_STR(EVENT_LISTENER_FAILED_ADD, failed_msg)
-    LOG_WARN(failed_msg, type, descriptor, result);
-	}	
+		LOG_WARN(failed_msg, descriptor->category, descriptor->address);
+	}
 }
 
-void event_remove_listeners(event_type type, event_descriptor descriptor) {
+void event_remove_listeners(event_descriptor descriptor) {
 	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
-		if (listeners[i].super.active && listeners[i].super.type == type && listeners[i].super.descriptor == descriptor) {
+		if (listeners[i].super.active && descriptors_equal(&listeners[i].super.descriptor, &descriptor)) {
 			listeners[i].super.active = false;
-		}		
+		}
 	}
 }
 
@@ -190,7 +187,7 @@ void event_clear_listeners() {
 	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
 		if (listeners[i].super.active) {
 			listeners[i].super.active = false;
-		}		
+		}
 	}
 }
 
@@ -274,7 +271,10 @@ static shell_result shell_list_sources() {
   PGM_STR(EVENT_SHELL_SOURCE_ROW, row)
 	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
 		if (sources[i].super.active) {
-			shell_printf(row, ++count, i, sources[i].super.type, sources[i].super.descriptor, sources[i].poll_interval);
+			shell_printf(row, ++count, i,
+					sources[i].super.descriptor.category,
+					sources[i].super.descriptor.address,
+					sources[i].poll_interval);
 		}
 	}
 	return SHELL_RESULT_SUCCESS;
@@ -294,7 +294,7 @@ static shell_result shell_list_listeners() {
   PGM_STR(EVENT_SHELL_LISTENER_ROW, row)
 	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
 		if (listeners[i].super.active) {
-			shell_printf(row, ++count, i, listeners[i].super.type, listeners[i].super.descriptor);
+			shell_printf(row, ++count, i, listeners[i].super.descriptor.category, listeners[i].super.descriptor.address);
 		}
 	}
 	return SHELL_RESULT_SUCCESS;

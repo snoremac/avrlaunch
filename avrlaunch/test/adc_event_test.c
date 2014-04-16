@@ -26,8 +26,8 @@ void test_should_register_event_source_when_listener_added() {
 	uint8_t channel = 2;
 	adc_event_add_listener(channel, 20, adc_event_handler);
 	TEST_ASSERT_EQUAL_UINT(1, event_source_count());
-	TEST_ASSERT_EQUAL_UINT(EVENT_TYPE_ADC, ((event_source*) first_event_source())->super.type);
-	TEST_ASSERT_EQUAL_UINT(channel, ((event_source*) first_event_source())->super.descriptor);	
+	TEST_ASSERT_EQUAL_UINT(EVENT_CATEGORY_ADC, first_event_source()->super.descriptor.category);
+	TEST_ASSERT_EQUAL_UINT(channel, first_event_source()->super.descriptor.address);
 }
 
 void test_should_deregister_event_source_when_listener_removed() {
@@ -39,7 +39,7 @@ void test_should_deregister_event_source_when_listener_removed() {
 
 	adc_event_remove_listeners(channel_2);
 	TEST_ASSERT_EQUAL_UINT(1, event_source_count());
-	TEST_ASSERT_EQUAL_UINT(channel_3, ((event_source*) first_event_source())->super.descriptor);
+	TEST_ASSERT_EQUAL_UINT(channel_3, first_event_source()->super.descriptor.address);
 
 	adc_event_remove_listeners(channel_3);
 	TEST_ASSERT_EQUAL_UINT(0, event_source_count());
@@ -52,7 +52,7 @@ void test_should_raise_event_after_reading_changed_beyond_threshold() {
 	uint8_t channel = 2;
 	simulate_adc_change(channel, 20, 20);
 	TEST_ASSERT_EQUAL_UINT(1, callback_count);
-	TEST_ASSERT_EQUAL_UINT(channel, last_event.super.descriptor);
+	TEST_ASSERT_EQUAL_UINT(channel, last_event.super.descriptor.address);
 }
 
 void test_should_not_raise_event_when_reading_changes_below_threshold() {

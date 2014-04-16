@@ -123,7 +123,7 @@ static void light_off_task(struct task* task) {
 
 static bool button_event_handler(event* event) {
 	gpio_event* button_event = (gpio_event*) event;
-	if (button_event->super.descriptor == gpio_to_descriptor(&button_gpio)) {
+	if (button_event->super.descriptor.address == gpio_to_descriptor(&button_gpio).address) {
 		if (button_event->event_type == GPIO_UP) {
 			if (fade_on) {
 				stop_fade();

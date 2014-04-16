@@ -1,5 +1,5 @@
-#ifndef AVR_KIT_HAL_ATMEGA328P_HAL_GPIO_H
-#define AVR_KIT_HAL_ATMEGA328P_HAL_GPIO_H
+#ifndef AVRLAUNCH_HAL_ATMEGA328P_HAL_GPIO_H
+#define AVRLAUNCH_HAL_ATMEGA328P_HAL_GPIO_H
 
 #include <inttypes.h>
 #include <avr/io.h>

@@ -25,13 +25,13 @@ void gpio_event_test_tear_down() {
 void test_should_register_event_source_when_event_listener_added() {
 	struct gpio gpio = GPIO(PORTD, PIN2);
 	gpio_event_add_listener(&gpio, gpio_event_handler);
-  
+
 	TEST_ASSERT_EQUAL_UINT(1, event_source_count());
-	TEST_ASSERT_EQUAL_UINT(EVENT_TYPE_GPIO, ((event_source*) first_event_source())->super.type);
+	TEST_ASSERT_EQUAL_UINT(EVENT_CATEGORY_GPIO, ((event_source*) first_event_source())->super.descriptor.category);
 	TEST_ASSERT_EQUAL_UINT(&PORTD,
-      gpio_from_descriptor(((event_source*) first_event_source())->super.descriptor).data);
+      gpio_from_descriptor(&first_event_source()->super.descriptor).data);
 	TEST_ASSERT_EQUAL_UINT(PIN2,
-      gpio_from_descriptor(((event_source*) first_event_source())->super.descriptor).pin);
+      gpio_from_descriptor(&first_event_source()->super.descriptor).pin);
 }
 
 void test_should_deregister_event_source_when_event_listener_removed() {
@@ -44,9 +44,9 @@ void test_should_deregister_event_source_when_event_listener_removed() {
 	gpio_event_remove_listeners(&gpio_a);
 	TEST_ASSERT_EQUAL_UINT(1, event_source_count());
 	TEST_ASSERT_EQUAL_UINT(&PORTD,
-      gpio_from_descriptor(((event_source*) first_event_source())->super.descriptor).data);
+      gpio_from_descriptor(&first_event_source()->super.descriptor).data);
 	TEST_ASSERT_EQUAL_UINT(PIN3,
-      gpio_from_descriptor(((event_source*) first_event_source())->super.descriptor).pin);
+      gpio_from_descriptor(&first_event_source()->super.descriptor).pin);
 
 	gpio_event_remove_listeners(&gpio_b);
 	TEST_ASSERT_EQUAL_UINT(0, event_source_count());

@@ -1,5 +1,5 @@
-#ifndef AVR_KIT_EVENT_ADC_EVENT_H
-#define AVR_KIT_EVENT_ADC_EVENT_H
+#ifndef AVRLAUNCH_EVENT_ADC_EVENT_H
+#define AVRLAUNCH_EVENT_ADC_EVENT_H
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -7,7 +7,7 @@
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/event/event.h"
 
-#define EVENT_TYPE_ADC 3
+#define EVENT_CATEGORY_ADC 3
 
 typedef struct adc_reading {
 	uint16_t current_state;

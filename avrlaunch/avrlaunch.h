@@ -27,8 +27,6 @@ typedef enum logic_level {
 	LOGIC_UNKNOWN, LOGIC_LOW, LOGIC_HIGH
 } logic_level;
 
-typedef uint8_t event_type;
-typedef uint16_t event_descriptor;
 typedef uint32_t time;
 
 typedef void (*error_callback)(const char* message);

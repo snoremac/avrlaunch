@@ -10,10 +10,6 @@
 typedef struct gpio gpio;
 typedef struct gpio_timer gpio_timer;
 
-event_descriptor gpio_to_descriptor(const gpio* gpio);
-
-gpio gpio_from_descriptor(event_descriptor descriptor);
-
 void gpio_set_input(const gpio* gpio);
 
 void gpio_set_output(const gpio* gpio);

@@ -5,7 +5,7 @@
 #include "avrlaunch/event/event.h"
 #include "avrlaunch/hal/hal_gpio.h"
 
-#define EVENT_TYPE_GPIO 1
+#define EVENT_CATEGORY_GPIO 1
 
 struct gpio_read {
 	logic_level current_state;
@@ -30,6 +30,6 @@ void gpio_event_remove_listeners(gpio* gpio);
 
 event_descriptor gpio_to_descriptor(const gpio* gpio);
 
-struct gpio gpio_from_descriptor(event_descriptor);
+struct gpio gpio_from_descriptor(event_descriptor* descriptor);
 
 #endif

@@ -4,6 +4,7 @@
 #include <avr/interrupt.h>
 
 #include "avrlaunch/avrlaunch.h"
+#include "avrlaunch/event/event.h"
 #include "avrlaunch/event/uart_event.h"
 #include "avrlaunch/hal/hal_uart.h"
 
@@ -22,7 +23,7 @@ static volatile uart_buffer buffer = {
 
 static uart_char_event current_uart_char_event;
 
-static event* uart_poll_handler(event_type type, event_descriptor descriptor);
+static event* uart_poll_handler(event_descriptor* descriptor);
 static char pop_uart_buffer(void);
 
 ISR(USART_RX_vect) {
@@ -40,20 +41,19 @@ ISR(USART_RX_vect) {
 }
 
 void uart_event_add_listener(event_handler handler) {
-  event_register_source(EVENT_TYPE_UART, 0, 50, uart_poll_handler);
-  event_add_listener(EVENT_TYPE_UART, 0, handler);
+  event_register_source((event_descriptor) { EVENT_CATEGORY_UART, 0 }, 50, uart_poll_handler);
+  event_add_listener((event_descriptor) { EVENT_CATEGORY_UART, 0 }, handler);
 }
 
 void uart_event_remove_listeners() {
-  event_remove_listeners(EVENT_TYPE_UART, 0);
-	event_deregister_source(EVENT_TYPE_UART, 0);
+  event_remove_listeners((event_descriptor) { EVENT_CATEGORY_UART, 0 });
+	event_deregister_source((event_descriptor) { EVENT_CATEGORY_UART, 0 });
 }
 
-static event* uart_poll_handler(event_type type, event_descriptor descriptor) {
+static event* uart_poll_handler(event_descriptor* descriptor) {
 	char c = pop_uart_buffer();
 	if (c != 0) {
-    current_uart_char_event.super.type = EVENT_TYPE_UART;
-    current_uart_char_event.super.descriptor = 0;
+    current_uart_char_event.super.descriptor = *descriptor;
     current_uart_char_event.uart_char = c;
 		return (event*) &current_uart_char_event;
 	}
