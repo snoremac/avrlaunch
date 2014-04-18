@@ -14,6 +14,7 @@
 #include "avrlaunch/test/scheduler_test.h"
 #include "avrlaunch/test/shell_test.h"
 #include "avrlaunch/test/event_test.h"
+#include "avrlaunch/test/buffer_event_test.h"
 #include "avrlaunch/test/gpio_event_test.h"
 
 #ifdef SIM
@@ -118,6 +119,16 @@ uint8_t test_run() {
 	RUN_TEST(test_should_invoke_event_listener_repeatedly, 0);
 	RUN_TEST(test_should_allow_event_listeners_to_remove_themselves, 0);
 	RUN_TEST(test_should_deregister_event_source_when_event_listener_removed, 0);
+#endif
+
+#ifdef TEST_BUFFER_EVENT
+  PGM_STR(BUFFER_EVENT_TEST_PATH, buffer_event_test_path)
+	Unity.TestFile = buffer_event_test_path;
+	set_up_func = buffer_event_test_set_up;
+	tear_down_func = buffer_event_test_tear_down;
+	RUN_TEST(test_should_register_buffer_event_source_when_event_listener_added, 0);
+	RUN_TEST(test_should_raise_single_event_on_buffer_full, 0);
+	RUN_TEST(test_should_raise_single_event_on_buffer_not_full, 0);
 #endif
 
 #ifdef TEST_GPIO_EVENT

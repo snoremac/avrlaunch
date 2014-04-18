@@ -6,8 +6,8 @@
 
 struct buffer {
   volatile void* data;
-  const uint16_t max_elements;
-  const uint16_t element_size;
+  uint16_t max_elements;
+  uint16_t element_size;
   volatile uint16_t start_element;
   volatile uint16_t element_count;
 };
@@ -15,6 +15,8 @@ struct buffer {
 typedef void (*element_print_handler)(struct buffer* buffer, uint16_t pos, FILE* stream);
 
 struct buffer buffer_init(volatile void* data, const uint16_t max_elements, const uint16_t element_size);
+
+void buffer_init_ptr(struct buffer* buffer, volatile void* data, const uint16_t max_elements, const uint16_t element_size);
 
 void buffer_push_overflow(struct buffer* buffer, volatile void* value);
 

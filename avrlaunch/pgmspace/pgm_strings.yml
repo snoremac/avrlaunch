@@ -43,6 +43,7 @@ buffer_int_test_path: "src/test/buffer_int_test.c"
 scheduler_test_path: "src/test/scheduler_test.c"
 shell_test_path: "src/test/shell_test.c"
 event_test_path: "src/test/event_test.c"
+buffer_event_test_path: "src/test/buffer_event_test.c"
 adc_event_test_path: "src/test/adc_event_test.c"
 gpio_event_test_path: "src/test/gpio_event_test.c"
 

@@ -7,7 +7,7 @@ rm -f /tmp/avrlaunch-*.txt
 outfile=/tmp/avrlaunch-$RANDOM.txt
 $PROJECT_DIR/bin/symlink-arduino.sh
 
-for group in BUFFER SCHEDULER,SHELL EVENT,GPIO_EVENT; do
+for group in BUFFER SCHEDULER,SHELL EVENT BUFFER_EVENT,GPIO_EVENT; do
   make -s clean test program TEST=$group
   $PROJECT_DIR/bin/test-serial.rb > $outfile
   if [ $? != 0 ]; then

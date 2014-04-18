@@ -5,21 +5,19 @@
 
 #include "avrlaunch/event/event.h"
 
-#define EVENT_TYPE_BUFFER 4
+#define EVENT_CATEGORY_BUFFER 4
 
-typedef enum buffer_event_type {
-	BUFFER_FULL, BUFFER_NOT_FULL
-} buffer_event_type;
+#define BUFFER_NONE 0x00
+#define BUFFER_FULL 0x01
+#define BUFFER_NOT_FULL 0x02
 
-typedef struct buffer_event {
-	event super;
-	buffer_event_type event_type;
-	struct buffer* buffer;
-} buffer_event;
+#ifndef MAX_BUFFER_STATES
+#define MAX_BUFFER_STATES 2
+#endif
 
-typedef bool (*buffer_event_handler)(buffer_event* event);
+void buffer_event_init(void);
 
-void buffer_event_add_listener(struct buffer* buffer, buffer_event_handler handler);
+void buffer_event_add_listener(struct buffer* buffer, event_handler handler);
 
 void buffer_event_remove_listeners(struct buffer* buffer);
 

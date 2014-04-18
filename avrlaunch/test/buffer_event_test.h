@@ -1,0 +1,11 @@
+#ifndef AVRLAUNCH_BUFFER_EVENT_TEST_H
+#define AVRLAUNCH_BUFFER_EVENT_TEST_H
+
+void buffer_event_test_set_up(void);
+void buffer_event_test_tear_down(void);
+
+void test_should_register_buffer_event_source_when_event_listener_added(void);
+void test_should_raise_single_event_on_buffer_full(void);
+void test_should_raise_single_event_on_buffer_not_full(void);
+
+#endif

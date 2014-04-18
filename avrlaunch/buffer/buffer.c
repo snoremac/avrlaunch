@@ -9,15 +9,24 @@
 #include "avrlaunch/log.h"
 
 struct buffer buffer_init(volatile void* data, const uint16_t max_elements, const uint16_t element_size) {
-    struct buffer buffer = (struct buffer) {
-      .data = data,
-      .max_elements = max_elements,
-      .element_size = element_size,
-      .start_element = 0,
-      .element_count = 0
-    };
-    memset((void*) data, 0, max_elements * element_size);
-    return buffer;
+  struct buffer buffer = (struct buffer) {
+    .data = data,
+    .max_elements = max_elements,
+    .element_size = element_size,
+    .start_element = 0,
+    .element_count = 0
+  };
+  memset((void*) data, 0, max_elements * element_size);
+  return buffer;
+}
+
+void buffer_init_ptr(struct buffer* buffer, volatile void* data, const uint16_t max_elements, const uint16_t element_size) {
+  buffer->data = data;
+  buffer->max_elements = max_elements;
+  buffer->element_size = element_size;
+  buffer->start_element = 0;
+  buffer->element_count = 0;
+  memset((void*) data, 0, max_elements * element_size);
 }
 
 void buffer_push_overflow(struct buffer* buffer, volatile void* value) {
