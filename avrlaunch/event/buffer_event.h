@@ -9,7 +9,8 @@
 
 #define BUFFER_NONE 0x00
 #define BUFFER_FULL 0x01
-#define BUFFER_NOT_FULL 0x02
+#define BUFFER_EMPTY 0x02
+#define BUFFER_HOLDING 0x04
 
 #ifndef MAX_BUFFER_STATES
 #define MAX_BUFFER_STATES 2

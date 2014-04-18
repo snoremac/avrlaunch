@@ -48,7 +48,13 @@ static event* buffer_poll_handler(event_descriptor* descriptor) {
 }
 
 static uint8_t buffer_flags(struct buffer* buffer) {
-  return buffer->element_count == buffer->max_elements ? BUFFER_FULL : BUFFER_NOT_FULL;
+  if (buffer->element_count == 0) {
+    return BUFFER_EMPTY;
+  } else if (buffer->element_count == buffer->max_elements) {
+    return BUFFER_FULL;
+  } else {
+    return BUFFER_HOLDING;    
+  }
 }
 
 static uint8_t last_buffer_flags(struct buffer* buffer) {

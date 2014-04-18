@@ -78,7 +78,7 @@ void test_should_raise_single_event_on_buffer_not_full() {
 	event_tick();
 	TEST_ASSERT_EQUAL_UINT(1, callback_count);
 	TEST_ASSERT_EQUAL_PTR(&buffer, last_event.descriptor.address);
-	TEST_ASSERT_BITS_HIGH(BUFFER_NOT_FULL, last_event.flags);
+	TEST_ASSERT_BITS_HIGH(BUFFER_HOLDING, last_event.flags);
 
 	for (uint8_t i = 0; i < 5; i++) {
 		buffer_shift(&buffer);
