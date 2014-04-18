@@ -21,7 +21,7 @@ static volatile uart_buffer buffer = {
 	.count = 0
 };
 
-static uart_char_event current_uart_char_event;
+static event current_event;
 
 static event* uart_poll_handler(event_descriptor* descriptor);
 static char pop_uart_buffer(void);
@@ -47,15 +47,14 @@ void uart_event_add_listener(event_handler handler) {
 
 void uart_event_remove_listeners() {
   event_remove_listeners((event_descriptor) { EVENT_CATEGORY_UART, 0 });
-	event_deregister_source((event_descriptor) { EVENT_CATEGORY_UART, 0 });
 }
 
 static event* uart_poll_handler(event_descriptor* descriptor) {
 	char c = pop_uart_buffer();
 	if (c != 0) {
-    current_uart_char_event.super.descriptor = *descriptor;
-    current_uart_char_event.uart_char = c;
-		return (event*) &current_uart_char_event;
+    current_event.descriptor = *descriptor;
+    current_event.value = c;
+		return &current_event;
 	}
 	return NULL;
 }

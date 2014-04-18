@@ -13,7 +13,7 @@
 static int uart_sgetc(FILE *stream);
 static int uart_sputc(char c, FILE *stream);
 
-static bool on_uart_char_event(event* e);
+static bool on_uart_event(event* e);
 static void on_char(char c);
 static void on_char_return();
 static void on_char_backspace();
@@ -47,7 +47,7 @@ void shell_init() {
 	memset(command_buffer, '\0', SHELL_CMD_MAX_LENGTH);
 
   uart_enable(UART_BAUD);
-	uart_event_add_listener(on_uart_char_event);
+	uart_event_add_listener(on_uart_event);
   
 	print_prompt();
 }
@@ -72,9 +72,8 @@ static int uart_sputc(char c, FILE *stream) {
   return 0;
 }
 
-static bool on_uart_char_event(event* e) {
-	uart_char_event* event = (uart_char_event*) e;
-	char c = event->uart_char;
+static bool on_uart_event(event* event) {
+	char c = event->value;
 	if (c != 0) {
   	if (c == '\n') {
       on_char_return();
@@ -102,7 +101,7 @@ static void on_char_return() {
 		shell_invoke(command_buffer);        
   } else {
     PGM_STR(SHELL_CMD_TOO_LONG, failed_msg)
-    shell_printf(failed_msg);
+    shell_printf(failed_msg, SHELL_CMD_MAX_LENGTH);
   }
 
   print_prompt();

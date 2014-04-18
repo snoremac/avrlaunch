@@ -14,7 +14,6 @@
 #include "avrlaunch/test/scheduler_test.h"
 #include "avrlaunch/test/shell_test.h"
 #include "avrlaunch/test/event_test.h"
-#include "avrlaunch/test/adc_event_test.h"
 #include "avrlaunch/test/gpio_event_test.h"
 
 #ifdef SIM
@@ -118,19 +117,7 @@ uint8_t test_run() {
   RUN_TEST(test_should_invoke_event_listeners_for_fired_event, 0);
 	RUN_TEST(test_should_invoke_event_listener_repeatedly, 0);
 	RUN_TEST(test_should_allow_event_listeners_to_remove_themselves, 0);
-#endif
-
-#ifdef TEST_ADC_EVENT
-  PGM_STR(ADC_EVENT_TEST_PATH, adc_event_test_path)
-	Unity.TestFile = adc_event_test_path;
-	set_up_func = adc_event_test_set_up;
-	tear_down_func = adc_event_test_tear_down;
-	RUN_TEST(test_should_register_event_source_when_listener_added, 0);
-	RUN_TEST(test_should_deregister_event_source_when_listener_removed, 0);
-	#ifdef BOARD_mock
-	RUN_TEST(test_should_raise_event_after_reading_changed_beyond_threshold, 0);
-	RUN_TEST(test_should_not_raise_event_when_reading_changes_below_threshold, 0);
-	#endif
+	RUN_TEST(test_should_deregister_event_source_when_event_listener_removed, 0);
 #endif
 
 #ifdef TEST_GPIO_EVENT
@@ -140,10 +127,9 @@ uint8_t test_run() {
 	tear_down_func = gpio_event_test_tear_down;
 	RUN_TEST(test_should_register_event_source_when_event_listener_added, 0);
 	RUN_TEST(test_should_deregister_event_source_when_event_listener_removed, 0);
-	#ifdef BOARD_mock
 	RUN_TEST(test_should_raise_event_after_logic_level_change, 0);
 	RUN_TEST(test_not_should_raise_without_logic_level_change, 0);
-	#endif
+	RUN_TEST(test_gpio_descriptor, 0);
 #endif
 
 	return UnityEnd();

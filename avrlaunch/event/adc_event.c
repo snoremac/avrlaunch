@@ -9,7 +9,7 @@
 static volatile uint16_t last_readings[6];
 static volatile uint16_t eventhresholds[6];
 
-static adc_event current_adc_event;
+static event current_event;
 
 static adc_reading read(uint8_t channel);
 static event* adc_poll_handler(event_descriptor* descriptor);
@@ -26,7 +26,6 @@ void adc_event_add_listener(uint8_t channel, uint16_t eventhreshold, event_handl
 
 void adc_event_remove_listeners(uint8_t channel) {
   event_remove_listeners((event_descriptor) { EVENT_CATEGORY_ADC, channel });
-  event_deregister_source((event_descriptor) { EVENT_CATEGORY_ADC, channel });
 }
 
 static adc_reading read(uint8_t channel) {
@@ -47,7 +46,7 @@ static event* adc_poll_handler(event_descriptor* descriptor) {
 	if (reading.current_state == reading.previous_state) return NULL;
 	if (abs(abs(reading.current_state) - abs(reading.previous_state)) < eventhresholds[channel]) return NULL;
 
-	current_adc_event.super.descriptor = *descriptor;
-	current_adc_event.value = reading.current_state;
-	return (event*) &current_adc_event;
+	current_event.descriptor = *descriptor;
+	current_event.value = reading.current_state;
+	return &current_event;
 }

@@ -24,8 +24,10 @@ static event_listener listeners[EVENT_MAX_LISTENERS];
 static bool event_matches_listener(event* event, event_listener* listener);
 static bool descriptors_equal(event_descriptor* descriptor_a, event_descriptor* descriptor_b);
 
-static bool source_registered(event_descriptor* descriptor);
 static void update_source(event_descriptor* descriptor, event_poll_handler poll_handler);
+static void deregister_orphaned_source(event_descriptor* descriptor);
+static bool source_registered(event_descriptor* descriptor);
+static bool listener_registered(event_descriptor* descriptor);
 
 static void warn_failed_add_source(event_descriptor* descriptor, result result);
 static void warn_failed_add_listener(event_descriptor* descriptor, result result);
@@ -67,7 +69,8 @@ void event_fire_event(event* event) {
 		if (event_matches_listener(event, &listeners[i])) {
 			bool keep_listening = listeners[i].handler(event);
 			if (!keep_listening) {
-  			listeners[i].super.active = false;			  
+  			listeners[i].super.active = false;	
+				deregister_orphaned_source(&listeners[i].super.descriptor);
 			}
 		}		
 	}
@@ -119,6 +122,15 @@ static bool source_registered(event_descriptor* descriptor) {
 	return false;
 }
 
+static bool listener_registered(event_descriptor* descriptor) {
+	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
+		if (listeners[i].super.active && descriptors_equal(&listeners[i].super.descriptor, descriptor)) {
+			return true;
+		}
+	}
+	return false;	
+}
+
 static bool descriptors_equal(event_descriptor* descriptor_a, event_descriptor* descriptor_b) {
 	return (descriptor_a != NULL)
 			&& (descriptor_b != NULL)
@@ -132,6 +144,12 @@ static void update_source(event_descriptor* descriptor, event_poll_handler poll_
 			sources[i].poll_handler = poll_handler;
 		}
 	}
+}
+
+static void deregister_orphaned_source(event_descriptor* descriptor) {
+	if (!listener_registered(descriptor)) {
+		event_deregister_source(*descriptor);
+	}		  	
 }
 
 static void warn_failed_add_source(event_descriptor* descriptor, result result) {
@@ -171,6 +189,7 @@ void event_remove_listeners(event_descriptor descriptor) {
 	for (uint8_t i = 0; i < EVENT_MAX_LISTENERS; i++) {
 		if (listeners[i].super.active && descriptors_equal(&listeners[i].super.descriptor, &descriptor)) {
 			listeners[i].super.active = false;
+			deregister_orphaned_source(&listeners[i].super.descriptor);
 		}
 	}
 }

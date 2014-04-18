@@ -47,9 +47,8 @@ static void stop_blink() {
 }
 
 static bool button_event_handler(event* event) {
-	gpio_event* button_event = (gpio_event*) event;
-	if (button_event->super.descriptor.address == gpio_to_descriptor(&button_gpio).address) {
-		if (button_event->event_type == GPIO_DOWN) {
+	if (gpio_event_is_from(event, &button_gpio)) {
+		if (gpio_event_is_down(event)) {
 			if (light_on) {
         stop_blink();
 			} else {

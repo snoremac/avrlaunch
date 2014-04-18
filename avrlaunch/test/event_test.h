@@ -22,5 +22,6 @@ void test_should_invoke_multiple_event_listeners_for_one_source(void);
 void test_should_invoke_event_listeners_for_fired_event();
 void test_should_invoke_event_listener_repeatedly(void);
 void test_should_allow_event_listeners_to_remove_themselves(void);
+void test_should_deregister_event_source_when_event_listener_removed(void);
 
 #endif

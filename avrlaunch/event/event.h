@@ -19,6 +19,8 @@
 
 typedef uint8_t event_category;
 typedef uint16_t event_address;
+typedef uint8_t event_flags;
+typedef uint16_t event_value;
 
 typedef struct event_descriptor {
 	event_category category;
@@ -27,6 +29,8 @@ typedef struct event_descriptor {
 
 typedef struct event {
 	event_descriptor descriptor;
+	event_value value;
+	event_flags flags;
 } event;
 
 typedef event* (*event_poll_handler)(event_descriptor* descriptor);

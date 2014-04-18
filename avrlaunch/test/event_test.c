@@ -151,6 +151,22 @@ void test_should_allow_event_listeners_to_remove_themselves() {
 	TEST_ASSERT_EQUAL_UINT(5, callback_count_a);
 }
 
+void test_should_deregister_event_source_when_event_listener_removed() {
+  event_add_listener(descriptor_a, noop_event_handler);
+  event_register_source(descriptor_a, EVENT_POLL_INTERVAL_ASAP, event_poll_handler_a);
+  event_add_listener(descriptor_b, noop_event_handler);
+  event_register_source(descriptor_b, EVENT_POLL_INTERVAL_ASAP, event_poll_handler_b);
+  TEST_ASSERT_EQUAL_UINT(2, event_source_count());
+
+  event_remove_listeners(descriptor_a);
+  TEST_ASSERT_EQUAL_UINT(1, event_source_count());
+  TEST_ASSERT_EQUAL_UINT(descriptor_b.category, first_event_source()->super.descriptor.category);
+  TEST_ASSERT_EQUAL_UINT(descriptor_b.address, first_event_source()->super.descriptor.address);
+
+  event_remove_listeners(descriptor_b);
+  TEST_ASSERT_EQUAL_UINT(0, event_source_count());
+}
+
 static event* event_poll_handler_a(event_descriptor* descriptor) {
   poll_count_a++;
 	current_test_event.super.descriptor = *descriptor;
