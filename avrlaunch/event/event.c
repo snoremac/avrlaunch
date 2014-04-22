@@ -51,7 +51,7 @@ void event_tick() {
 
 	for (uint8_t i = 0; i < EVENT_MAX_SOURCES; i++) {
 		if (!sources[i].super.active) continue;
-
+		
 		if (time_now >= sources[i].next_scheduled_poll) {
       event* event = sources[i].poll_handler(&sources[i].super.descriptor);
   		if (null(event)) continue;

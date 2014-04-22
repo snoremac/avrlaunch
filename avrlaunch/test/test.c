@@ -137,8 +137,9 @@ uint8_t test_run() {
 	set_up_func = gpio_event_test_set_up;
 	tear_down_func = gpio_event_test_tear_down;
 	RUN_TEST(test_should_register_event_source_when_event_listener_added, 0);
-	RUN_TEST(test_should_deregister_event_source_when_event_listener_removed, 0);
+	#ifdef SIM
 	RUN_TEST(test_should_raise_event_after_logic_level_change, 0);
+	#endif
 	RUN_TEST(test_not_should_raise_without_logic_level_change, 0);
 	RUN_TEST(test_gpio_descriptor, 0);
 #endif

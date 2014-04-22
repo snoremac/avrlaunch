@@ -4,6 +4,7 @@
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/clock.h"
+#include "avrlaunch/log.h"
 #include "avrlaunch/event/event.h"
 #include "avrlaunch/event/event_internal.h"
 #include "avrlaunch/event/gpio_event.h"
@@ -45,7 +46,9 @@ void test_should_raise_event_after_logic_level_change() {
 	
 	gpio_event_add_listener(&gpio, gpio_event_handler);
 	gpio_write_high(&gpio);
+	//LOG_DEBUG("Time: %lu\n", clock_get_time());
 	delay(50);
+	//LOG_DEBUG("Time: %lu\n", clock_get_time());
 	event_tick();
 
 	TEST_ASSERT_EQUAL_UINT(1, callback_count);

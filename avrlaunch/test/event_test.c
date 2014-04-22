@@ -90,14 +90,13 @@ void test_should_remove_event_listeners() {
 }
 
 void test_should_poll_on_specified_interval() {
-	time start_time = clock_get_time();
   event_register_source(descriptor_a, 1000, event_poll_handler_a);
   event_add_listener(descriptor_a, noop_event_handler);
 
 	event_tick();
 	TEST_ASSERT_EQUAL_UINT(0, poll_count_a);
 
-	clock_set_time(start_time + 1000);
+	clock_add_time(1000);
 	event_tick();
 	TEST_ASSERT_EQUAL_UINT(1, poll_count_a);
 }

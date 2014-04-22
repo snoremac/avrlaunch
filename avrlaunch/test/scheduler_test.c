@@ -44,13 +44,13 @@ void test_should_add_task() {
 }
 
 void test_should_invoke_one_shot_task() {
-  struct task_config config = { "noop", TASK_ONCE, 1000 };
 	time start_time = clock_get_time();
+  struct task_config config = { "noop", TASK_ONCE, 1000 };
 	scheduler_add_task(&config, counting_task, NULL);
 
-	clock_set_time(start_time + 1000);
+	clock_add_time(1000);
 	scheduler_tick();
-	clock_set_time(start_time + 2000);
+	clock_add_time(2000);
 	scheduler_tick();
 
 	TEST_ASSERT_EQUAL_UINT(1, callback_count);
@@ -58,13 +58,11 @@ void test_should_invoke_one_shot_task() {
 }
 
 void test_should_allow_many_one_shot_tasks() {
-	time start_time = clock_get_time();
-
 	for (uint32_t i = 0; i < 50; i++) {
     struct task_config config = { "once", TASK_ONCE, 1000 };
 		scheduler_add_task(&config, counting_task, NULL);
 
-		clock_set_time(start_time + ((i + 1) * 1000));
+		clock_add_time((i + 1) * 1000);
 		scheduler_tick();
 	}
 	
@@ -74,10 +72,9 @@ void test_should_allow_many_one_shot_tasks() {
 void test_should_invoke_repeating_task() {
   struct task_config config = { "count", TASK_FOREVER, 1000 };
 	scheduler_add_task(&config, counting_task, NULL);
-	time start_time = clock_get_time();
 	
 	for (uint32_t i = 0; i < 10; i++) {
-		clock_set_time(start_time + ((i + 1) * 1000));
+		clock_add_time((i + 1) * 1000);
 		scheduler_tick();
 	}
 
@@ -85,13 +82,11 @@ void test_should_invoke_repeating_task() {
 }
 
 void test_should_allow_repeating_tasks_to_cancel_themselves() {
-	time start_time = clock_get_time();
-
   struct task_config config = { "count", TASK_FOREVER, 1000 };
 	scheduler_add_task(&config, cancelling_task, NULL);
 	
 	for (uint32_t i = 0; i < 10; i++) {
-		clock_set_time(start_time + ((i + 1) * 1000));
+		clock_add_time((i + 1) * 1000);
 		scheduler_tick();
 	}
 
@@ -99,11 +94,10 @@ void test_should_allow_repeating_tasks_to_cancel_themselves() {
 }
 
 void test_should_store_task_data_in_task() {
-	time start_time = clock_get_time();
   struct task_config config = { "once", TASK_ONCE, 1000 };
 	scheduler_add_task(&config, data_check_task, "data");
 
-	clock_set_time(start_time + 1000);
+	clock_add_time(1000);
 	scheduler_tick();
 
 	TEST_ASSERT_EQUAL_STRING("data", callback_data);
