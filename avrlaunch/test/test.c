@@ -116,6 +116,7 @@ uint8_t test_run() {
 	RUN_TEST(test_should_invoke_one_event_listener, 0);
 	RUN_TEST(test_should_invoke_multiple_event_listeners_for_one_source, 0);
   RUN_TEST(test_should_invoke_event_listeners_for_fired_event, 0);
+  RUN_TEST(test_should_invoke_all_category_listeners_when_no_address_specified, 0);
 	RUN_TEST(test_should_invoke_event_listener_repeatedly, 0);
 	RUN_TEST(test_should_allow_event_listeners_to_remove_themselves, 0);
 	RUN_TEST(test_should_deregister_event_source_when_event_listener_removed, 0);

@@ -134,8 +134,9 @@ static bool listener_registered(event_descriptor* descriptor) {
 static bool descriptors_equal(event_descriptor* descriptor_a, event_descriptor* descriptor_b) {
 	return (descriptor_a != NULL)
 			&& (descriptor_b != NULL)
-			&& (descriptor_a->category == descriptor_b->category)
-			&& (descriptor_a->address == descriptor_b->address);
+			&& (descriptor_a->category == descriptor_b->category)			
+			&& (descriptor_a->address == 0 || descriptor_b->address == 0
+			|| (descriptor_a->address == descriptor_b->address));
 }
 
 static void update_source(event_descriptor* descriptor, event_poll_handler poll_handler) {

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "avrlaunch/avrlaunch.h"
+#include "avrlaunch/event/event.h"
 
 #ifndef EVENT_MAX_SOURCES
 #define EVENT_MAX_SOURCES 0
@@ -16,6 +17,8 @@
 
 #define EVENT_POLL_INTERVAL_ASAP 0
 #define EVENT_POLL_INTERVAL_MAX UINT16_MAX
+
+#define EVENT_LISTENER(CATEGORY, ADDRESS) (event_descriptor) { CATEGORY, ADDRESS }
 
 typedef uint8_t event_category;
 typedef uint16_t event_address;

@@ -23,6 +23,7 @@ static bool cancelling_event_handler(event* event);
 
 static event_descriptor descriptor_a;
 static event_descriptor descriptor_b;
+static event_descriptor descriptor_c;
 static uint8_t poll_count_a;
 static uint8_t callback_count_a;
 static uint8_t callback_count_b;
@@ -32,10 +33,12 @@ static test_event last_received_event;
 void event_test_set_up() {
   descriptor_a = (event_descriptor) { EVENT_CATEGORY_TEST, EVENT_ADDRESS_TEST_A };
   descriptor_b = (event_descriptor) { EVENT_CATEGORY_TEST, EVENT_ADDRESS_TEST_B };
+  descriptor_c = (event_descriptor) { EVENT_CATEGORY_TEST, 0 };
   event_clear_sources();
   event_clear_listeners();
   poll_count_a = 0;
   callback_count_a = 0;
+  callback_count_b = 0;
 }
 
 void event_test_tear_down() {
@@ -138,6 +141,18 @@ void test_should_invoke_event_listeners_for_fired_event() {
 	event* event = event_poll_handler_a(&descriptor_a);
   event_fire_event(event);
 	TEST_ASSERT_EQUAL_UINT(2, callback_count_a);
+}
+
+void test_should_invoke_all_category_listeners_when_no_address_specified() {
+  event_add_listener(descriptor_c, counting_event_handler);
+  event_add_listener(descriptor_c, counting_event_handler);
+
+	event* event = event_poll_handler_a(&descriptor_a);
+  event_fire_event(event);
+	event = event_poll_handler_b(&descriptor_b);
+  event_fire_event(event);
+	TEST_ASSERT_EQUAL_UINT(2, callback_count_a);
+	TEST_ASSERT_EQUAL_UINT(2, callback_count_b);
 }
 
 void test_should_allow_event_listeners_to_remove_themselves() {
