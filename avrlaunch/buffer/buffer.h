@@ -16,7 +16,7 @@ typedef void (*element_print_handler)(struct buffer* buffer, uint16_t pos, FILE*
 
 struct buffer buffer_init(volatile void* data, const uint16_t max_elements, const uint16_t element_size);
 
-void buffer_init_ptr(struct buffer* buffer, volatile void* data, const uint16_t max_elements, const uint16_t element_size);
+void buffer_reset(struct buffer* buffer);
 
 void buffer_push_overflow(struct buffer* buffer, volatile void* value);
 
