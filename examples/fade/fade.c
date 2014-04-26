@@ -1,7 +1,5 @@
 
 #include <stdio.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/log.h"

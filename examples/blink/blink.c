@@ -1,6 +1,5 @@
 
 #include <stdio.h>
-#include <avr/io.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/scheduler.h"

@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <avr/interrupt.h>
-#include <util/atomic.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/clock.h"

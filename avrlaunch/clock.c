@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <util/atomic.h>
 

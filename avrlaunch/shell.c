@@ -6,14 +6,16 @@
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/shell.h"
 #include "avrlaunch/shell_internal.h"
+#include "avrlaunch/buffer/buffer.h"
+#include "avrlaunch/buffer/buffer_int.h"
 #include "avrlaunch/pgmspace/pgm_strings.h"
-#include "avrlaunch/event/uart_event.h"
+#include "avrlaunch/event/buffer_event.h"
 #include "avrlaunch/hal/hal_uart.h"
 
 static int uart_sgetc(FILE *stream);
 static int uart_sputc(char c, FILE *stream);
 
-static bool on_uart_event(event* e);
+static bool on_uart_buffer_event(event* e);
 static void on_char(char c);
 static void on_char_return();
 static void on_char_backspace();
@@ -47,7 +49,7 @@ void shell_init() {
 	memset(command_buffer, '\0', SHELL_CMD_MAX_LENGTH);
 
   uart_enable(UART_BAUD);
-	uart_event_add_listener(on_uart_event);
+  buffer_event_add_listener(get_uart_buffer(), on_uart_buffer_event);
   
 	print_prompt();
 }
@@ -72,17 +74,20 @@ static int uart_sputc(char c, FILE *stream) {
   return 0;
 }
 
-static bool on_uart_event(event* event) {
-	char c = event->value;
-	if (c != 0) {
-  	if (c == '\n') {
-      on_char_return();
-    } else if (c == '\b') {
-      on_char_backspace();
-		} else {
-      on_char(c);
-		}
-	}
+static bool on_uart_buffer_event(event* event) {
+  if (event-> flags & BUFFER_HOLDING) {
+  	char c = buffer_shift_uint8((struct buffer*) event->descriptor.address);
+  	if (c != 0) {
+    	if (c == '\n') {
+        on_char_return();
+      } else if (c == '\b') {
+        on_char_backspace();
+  		} else {
+        on_char(c);
+  		}
+  	}
+    
+  }
 	return true;
 }
 

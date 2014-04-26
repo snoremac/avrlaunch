@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "avrlaunch/buffer/buffer.h"
 #include "avrlaunch/event/event.h"
 
 #define EVENT_CATEGORY_BUFFER 4

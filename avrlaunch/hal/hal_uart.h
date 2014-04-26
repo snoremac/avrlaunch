@@ -11,10 +11,10 @@ void uart_enable(uint32_t baud);
 
 void uart_disable(void);
 
-char uart_pollc(void);
-
 void uart_putc(char c);
 
 void uart_putc_raw(char c);
+
+struct buffer* get_uart_buffer(void);
 
 #endif

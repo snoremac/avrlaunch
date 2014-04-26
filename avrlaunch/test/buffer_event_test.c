@@ -21,7 +21,6 @@ static bool buffer_event_handler(event* event);
 void buffer_event_test_set_up() {
 	event_clear_sources();
 	event_clear_listeners();
-	buffer_event_init();
 	callback_count = 0;
 }
 

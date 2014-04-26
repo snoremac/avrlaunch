@@ -1,6 +1,6 @@
 #include <math.h>
-#include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/atomic.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/shell.h"
@@ -51,33 +51,31 @@ void wave_init() {
 }
 
 void wave_on(waveform_type waveform, float hertz) {
-  cli();
+  ATOMIC_BLOCK(ATOMIC_FORCEON) {
+    switch (waveform) {
+      case WAVE_SAWTOOTH:
+        current_converter = sawtooth_converter;
+        break;
+      case WAVE_SINE:
+        current_converter = sine_converter;
+        break;
+      case WAVE_SQUARE:
+        current_converter = square_converter;
+        break;
+      case WAVE_TRIANGLE:
+        current_converter = triangle_converter;
+        break;
+    }
 
-  switch (waveform) {
-    case WAVE_SAWTOOTH:
-      current_converter = sawtooth_converter;
-      break;
-    case WAVE_SINE:
-      current_converter = sine_converter;
-      break;
-    case WAVE_SQUARE:
-      current_converter = square_converter;
-      break;
-    case WAVE_TRIANGLE:
-      current_converter = triangle_converter;
-      break;
+    phase_accumulator = 0;
+    tuning_word = pow(2, 32) * hertz / (F_CPU / 510);
+
+    gpio_set_output_compare(&wave_gpio_timer, 0);
+    gpio_connect_timer_non_inverting(&wave_gpio_timer);
+
+    // Enable interrupt
+    set_bit(&TIMSK2, TOIE2);
   }
-
-  phase_accumulator = 0;
-  tuning_word = pow(2, 32) * hertz / (F_CPU / 510);
-
-  gpio_set_output_compare(&wave_gpio_timer, 0);
-  gpio_connect_timer_non_inverting(&wave_gpio_timer);
-
-  // Enable interrupt
-  set_bit(&TIMSK2, TOIE2);
-
-  sei();
 }
 
 void wave_off() {

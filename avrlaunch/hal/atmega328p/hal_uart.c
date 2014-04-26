@@ -1,9 +1,20 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <util/atomic.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/hal/hal_uart.h"
+#include "avrlaunch/buffer/buffer.h"
+#include "avrlaunch/buffer/buffer_int.h"
+
+#define UART_BUFFER_SIZE 8
+
+static struct buffer uart_buffer;
+static uint8_t uart_buffer_data[UART_BUFFER_SIZE];
+
+static void set_baud(uint32_t baud);
+static void configure_uart(void);
 
 static void baud_9600(void);
 static void baud_38400(void);
@@ -13,67 +24,73 @@ static void baud_115200(void);
 static void baud_230400(void);
 
 void uart_enable(uint32_t baud) {
-	uint8_t oldSREG = SREG;
-	cli();
+	uart_buffer = buffer_init(uart_buffer_data, UART_BUFFER_SIZE, sizeof(uint8_t));
+	set_baud(baud);
+	configure_uart();
+}
 
-	switch (baud) {
-		case 9600:
-			baud_9600();
-			break;
-		case 38400:
-			baud_38400();
-			break;
-		case 57600:
-			baud_57600();
-			break;
-		case 115200:
-			baud_115200();
-			break;
-		case 230400:
-			baud_230400();
-			break;
-		default:
-			baud_38400();
-			break;
+static void set_baud(uint32_t baud) {
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		switch (baud) {
+			case 9600:
+				baud_9600();
+				break;
+			case 38400:
+				baud_38400();
+				break;
+			case 57600:
+				baud_57600();
+				break;
+			case 115200:
+				baud_115200();
+				break;
+			case 230400:
+				baud_230400();
+				break;
+			default:
+				baud_38400();
+				break;
+		}
 	}
+}
 
-	// 8 bit characters
-	set_bit(&UCSR0C, UCSZ00);
-	set_bit(&UCSR0C, UCSZ01);
-	clear_bit(&UCSR0B, UCSZ02);
+static void configure_uart(void) {
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		// 8 bit characters
+		set_bit(&UCSR0C, UCSZ00);
+		set_bit(&UCSR0C, UCSZ01);
+		clear_bit(&UCSR0B, UCSZ02);
 
-	// Asynchronous mode
-	clear_bit(&UCSR0C, UMSEL00);
-	clear_bit(&UCSR0C, UMSEL01);
+		// Asynchronous mode
+		clear_bit(&UCSR0C, UMSEL00);
+		clear_bit(&UCSR0C, UMSEL01);
 
-	// No parity
-	clear_bit(&UCSR0C, UPM00);
-	clear_bit(&UCSR0C, UPM01);
+		// No parity
+		clear_bit(&UCSR0C, UPM00);
+		clear_bit(&UCSR0C, UPM01);
 
-	// Even parity
-	// clear_bit(&UCSR0C, UPM00);
-	// set_bit(&UCSR0C, UPM01);
+		// Even parity
+		// clear_bit(&UCSR0C, UPM00);
+		// set_bit(&UCSR0C, UPM01);
 
-	// 1 stop bit
-	clear_bit(&UCSR0C, USBS0);
+		// 1 stop bit
+		clear_bit(&UCSR0C, USBS0);
 
-	// 2 stop bits
-	// set_bit(&UCSR0C, USBS0);
+		// 2 stop bits
+		// set_bit(&UCSR0C, USBS0);
 
-	// Clock polarity (N/A in asynchronous mode)
-	clear_bit(&UCSR0C, UCPOL0);
+		// Clock polarity (N/A in asynchronous mode)
+		clear_bit(&UCSR0C, UCPOL0);
 
-	// Enable RX
-  set_bit(&UCSR0B, RXEN0);
-	
-	// Enable receive complete interrupt
-	set_bit(&UCSR0B, RXCIE0);
+		// Enable RX
+	  set_bit(&UCSR0B, RXEN0);
+		
+		// Enable receive complete interrupt
+		set_bit(&UCSR0B, RXCIE0);
 
-	// Enable TX
-	set_bit(&UCSR0B, TXEN0);
-
-	SREG = oldSREG;
-	sei();
+		// Enable TX
+		set_bit(&UCSR0B, TXEN0);			
+	}
 }
 
 void uart_disable() {
@@ -90,22 +107,6 @@ void uart_disable() {
 	SREG = oldSREG;
 }
 
-char uart_pollc() {
-	loop_until_bit_is_set(UCSR0A, RXC0);
-
-	if (bit_is_set(UCSR0A, FE0)) {
-		return _FDEV_EOF;
-	}
-	if (bit_is_set(UCSR0A, DOR0)) {
-		return _FDEV_ERR;
-	}
-	char c = UDR0;
-	if (c == '\r') {
-		c = '\n';
-	}
-	return c;
-}
-
 void uart_putc(char c) {
 	if (c == '\n') {
 		uart_putc('\r');
@@ -116,6 +117,18 @@ void uart_putc(char c) {
 void uart_putc_raw(char c) {
 	loop_until_bit_is_set(UCSR0A, UDRE0);
 	UDR0 = c;
+}
+
+struct buffer* get_uart_buffer(void) {
+	return &uart_buffer;
+}
+
+ISR(USART_RX_vect) {
+	char c = UDR0;
+	if (c == '\r') {
+		c = '\n';
+	}
+	buffer_push_overflow(&uart_buffer, &c);
 }
 
 static void baud_9600() {

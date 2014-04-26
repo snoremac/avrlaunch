@@ -11,6 +11,7 @@
 #include "avrlaunch/shell.h"
 #include "avrlaunch/scheduler.h"
 #include "avrlaunch/event/event.h"
+#include "avrlaunch/event/buffer_event.h"
 #include "avrlaunch/hal/hal_adc.h"
 #include "avrlaunch/hal/hal_gpio.h"
 #include "avrlaunch/hal/hal_uart.h"
@@ -27,6 +28,7 @@ int main() {
 	clock_init();
 	scheduler_init();
 	event_init();
+  buffer_event_init();
 	shell_init();
 
   struct task_config setup_config = { "setup", TASK_ONCE, TASK_ASAP };
