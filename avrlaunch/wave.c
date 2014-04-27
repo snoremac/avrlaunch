@@ -1,11 +1,10 @@
 #include <math.h>
 #include <avr/pgmspace.h>
-#include <util/atomic.h>
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/shell.h"
 #include "avrlaunch/wave.h"
-#include "avrlaunch/hal/hal_gpio.h"
+#include "avrlaunch/hal/hal_wave.h"
 
 prog_uchar sine256[] PROGMEM = {
   127,130,133,136,139,143,146,149,152,155,158,161,164,167,170,173,
@@ -26,69 +25,54 @@ prog_uchar sine256[] PROGMEM = {
 
 typedef uint8_t (*amplitude_converter)(uint8_t phase_position);
 
-static gpio wave_gpio;
-static gpio_timer wave_gpio_timer;
-
 static volatile long phase_accumulator;
 static volatile long tuning_word;
 
-static amplitude_converter current_converter;
+static amplitude_converter current_amplitude_converter;
 
 static uint8_t sawtooth_converter(uint8_t phase_position);
 static uint8_t sine_converter(uint8_t phase_position);
 static uint8_t square_converter(uint8_t phase_position);
 static uint8_t triangle_converter(uint8_t phase_position);
 
-static void configure_timer(void);
+static uint8_t next_amplitude_callback(void);
 
 void wave_init() {
-  wave_gpio = GPIO(PORTB, PIN3);
-  wave_gpio_timer = GPIO_TIMER(PORTB, PIN3);
-
-  gpio_set_output(&wave_gpio);
-  configure_timer();
+  wave_timer_init();
   wave_off();
 }
 
 void wave_on(waveform_type waveform, float hertz) {
-  ATOMIC_BLOCK(ATOMIC_FORCEON) {
-    switch (waveform) {
-      case WAVE_SAWTOOTH:
-        current_converter = sawtooth_converter;
-        break;
-      case WAVE_SINE:
-        current_converter = sine_converter;
-        break;
-      case WAVE_SQUARE:
-        current_converter = square_converter;
-        break;
-      case WAVE_TRIANGLE:
-        current_converter = triangle_converter;
-        break;
-    }
-
-    phase_accumulator = 0;
-    tuning_word = pow(2, 32) * hertz / (F_CPU / 510);
-
-    gpio_set_output_compare(&wave_gpio_timer, 0);
-    gpio_connect_timer_non_inverting(&wave_gpio_timer);
-
-    // Enable interrupt
-    set_bit(&TIMSK2, TOIE2);
+  switch (waveform) {
+    case WAVE_SAWTOOTH:
+      current_amplitude_converter = sawtooth_converter;
+      break;
+    case WAVE_SINE:
+      current_amplitude_converter = sine_converter;
+      break;
+    case WAVE_SQUARE:
+      current_amplitude_converter = square_converter;
+      break;
+    case WAVE_TRIANGLE:
+      current_amplitude_converter = triangle_converter;
+      break;
   }
+
+  phase_accumulator = 0;
+  tuning_word = pow(2, 32) * hertz / (F_CPU / 510);
+
+  wave_timer_on(next_amplitude_callback);
 }
 
 void wave_off() {
-  gpio_disconnect_timer(&wave_gpio_timer);
-
-  // Disable interrupt
-  clear_bit(&TIMSK2, TOIE2);
+  wave_timer_off();
 }
 
-ISR(TIMER2_OVF_vect) {
+static uint8_t next_amplitude_callback(void) {
   uint8_t phase_position = (uint8_t) (phase_accumulator >> 24);
-  gpio_set_output_compare(&wave_gpio_timer, current_converter(phase_position));
-  phase_accumulator += tuning_word;
+  uint8_t amplitude = current_amplitude_converter(phase_position);
+  phase_accumulator += tuning_word;  
+  return amplitude;
 }
 
 static uint8_t sawtooth_converter(uint8_t phase_position) {
@@ -105,17 +89,4 @@ static uint8_t square_converter(uint8_t phase_position) {
 
 static uint8_t triangle_converter(uint8_t phase_position) {
   return phase_position < 128 ? phase_position * 2 : (128 - (phase_position - 127)) * 2;
-}
-
-static void configure_timer() {
-  // Timer 2
-  // Prescale 1
-  set_bit(&TCCR2B, CS20);
-  clear_bit(&TCCR2B, CS21);
-  clear_bit(&TCCR2B, CS22);
-
-  // Phase Correct PWM, TOP at 0xFF
-  set_bit(&TCCR2A, WGM20);
-  clear_bit(&TCCR2A, WGM21);
-  clear_bit(&TCCR2B, WGM22);
 }
