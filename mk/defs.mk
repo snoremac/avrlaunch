@@ -21,6 +21,7 @@ UART_BAUD ?= 230400
 DEFAULT_CFLAGS = \
 	-std=gnu99 \
 	-Os \
+	-finline-small-functions \
 	-ffunction-sections -fdata-sections \
 	-fshort-enums \
 	-Wall \
