@@ -1,6 +1,7 @@
 #ifndef AVRLAUNCH_RGB_LED_H
 #define AVRLAUNCH_RGB_LED_H
 
+#include "avrlaunch/gpio.h"
 #include "avrlaunch/hal/hal_gpio.h"
 
 #define RGB(RED, GREEN, BLUE) (struct rgb) { .red = RED, .green = GREEN, .blue = BLUE }

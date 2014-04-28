@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "avrlaunch/avrlaunch.h"
+#include "avrlaunch/gpio.h"
 #include "avrlaunch/event/event.h"
 #include "avrlaunch/hal/hal_gpio.h"
 

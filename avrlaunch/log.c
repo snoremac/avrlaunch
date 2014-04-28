@@ -2,6 +2,7 @@
 #include <avr/pgmspace.h>
 
 #include "avrlaunch/avrlaunch.h"
+#include "avrlaunch/gpio.h"
 #include "avrlaunch/log.h"
 #include "avrlaunch/shell.h"
 #include "avrlaunch/hal/hal_gpio.h"
