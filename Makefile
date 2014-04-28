@@ -12,7 +12,7 @@ include mk/defs.mk
 include mk/common.mk
 
 override INCLUDES += -I. -I$(AVRLAUNCH_HOME) -I$(AVRLAUNCH_BUILD)
-override INCLUDES += -I$(UNITY_SRC) -I$(AVR_PREFIX)/include
+override INCLUDES += -I$(UNITY_SRC) -I$(AVR_PREFIX)/include -I/usr/local/include
 
 avrlaunch_src = $(wildcard $(AVRLAUNCH_SRC)/*.c) \
 	$(wildcard $(AVRLAUNCH_SRC)/buffer/*.c) \

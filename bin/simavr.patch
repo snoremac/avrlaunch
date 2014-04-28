@@ -1,17 +1,9 @@
 diff --git a/Makefile.common b/Makefile.common
-index 0477af2..cfde0fb 100644
+index dbafa0b..f55dbc0 100644
 --- a/Makefile.common
 +++ b/Makefile.common
-@@ -46,13 +46,13 @@ CORE_CFLAGS	= -nostdinc -DAVR_CORE=1
- ifeq (${shell uname}, Darwin)
- # gcc 4.2 from MacOS is really not up to scratch anymore 
- CC			= clang
--AVR_ROOT 	:= "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/"
--AVR_INC 	:= ${AVR_ROOT}/avr-4/
--AVR 		:= ${AVR_ROOT}/bin/avr-
-+AVR_ROOT 	:= /usr/local/avr/avr
-+AVR_INC 	:= ${AVR_ROOT}
-+AVR 		:= avr-
+@@ -51,11 +51,11 @@ AVR_INC 	:= ${AVR_ROOT}/avr-4/
+ AVR 		:= ${AVR_ROOT}/bin/avr-
  # Thats for MacPorts libelf
  ifeq (${shell test -d /opt/local && echo Exists}, Exists)
 -IPATH		+= /opt/local/include
@@ -20,12 +12,16 @@ index 0477af2..cfde0fb 100644
 +LFLAGS		= -L/opt/local/lib/ -L${AVR_ROOT}/lib
  endif
  else
- LINUX_AVR_ROOTS := /usr/lib/avr /usr/avr /opt/cross/avr/avr
+-LINUX_AVR_ROOTS := /usr/lib/avr /usr/avr /opt/cross/avr/avr /usr/local/avr
++LINUX_AVR_ROOTS := /usr/lib/avr /usr/avr /opt/cross/avr/avr /usr/local/avr /opt/local/avr
+ AVR_ROOT := $(firstword $(wildcard $(LINUX_AVR_ROOTS)))
+ ifeq (${AVR_ROOT},)
+ $(error No avr-libc root directory found. Tried the following paths: $(LINUX_AVR_ROOTS))
 diff --git a/simavr/Makefile b/simavr/Makefile
-index 080651c..ec67204 100644
+index aebc070..f822c15 100644
 --- a/simavr/Makefile
 +++ b/simavr/Makefile
-@@ -41,7 +41,7 @@ sim_o 	:= ${patsubst sim/%.c, ${OBJ}/%.o, ${sim}}
+@@ -43,7 +43,7 @@ sim_o 	:= ${patsubst sim/%.c, ${OBJ}/%.o, ${sim}}
  VPATH	= cores
  VPATH	+= sim
  
@@ -34,7 +30,7 @@ index 080651c..ec67204 100644
  IPATH	+= .
  IPATH	+= ../../shared
      
-@@ -186,7 +186,7 @@ sim_core_decl.h: sim_core_config.h $(cores) Makefile
+@@ -188,7 +188,7 @@ sim_core_decl.h: sim_core_config.h $(cores) Makefile
  	for core in $$(grep -r avr_kind_t cores/|awk -F '[ :]' '{print $$1 "=" $$3;}') ; do \
  		file=$${core/=*}; global=$${core/*=}; \
  		upper=$${file/cores\/sim_}; upper=$${upper/.c}; \
@@ -43,16 +39,3 @@ index 080651c..ec67204 100644
  		decl+="#if CONFIG_$$upper\nextern avr_kind_t $$global;\n#endif\n"; \
  		array+="#if CONFIG_$$upper\n\t&$$global,\n#endif\n"; \
  	done ; \
-diff --git a/tests/atmega88_coroutine.c b/tests/atmega88_coroutine.c
-index 559fcf8..a59aa7a 100644
---- a/tests/atmega88_coroutine.c
-+++ b/tests/atmega88_coroutine.c
-@@ -57,7 +57,7 @@ static inline void _set_stack(register void * stack)
- 			"out __SP_H__, %B0" "\n\t"
- 			"out __SREG__, r0" "\n\t"
- 			"out __SP_L__, %A0" "\n\t"
--			: : "e" (stack) :
-+			: : "e" (stack)
- 	);
- }
- 

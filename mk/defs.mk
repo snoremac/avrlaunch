@@ -1,5 +1,5 @@
 
-AVR_PREFIX = /usr/local/avr
+AVR_PREFIX = /opt/local/avr
 AVR_CONF = $(AVR_PREFIX)/etc/avrdude.conf 
 SHELL = /bin/sh
 
@@ -12,7 +12,7 @@ CC = avr-gcc
 AR = avr-ar
 OBJCOPY = avr-objcopy
 
-MCU = atmega328p
+MCU ?= atmega328p
 FREQ = 16000000L
 
 LOG_LEVEL ?= 2

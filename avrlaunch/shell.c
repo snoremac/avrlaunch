@@ -185,7 +185,7 @@ static shell_result delegating_handler(shell_command* command) {
 		shell_handler* handler = lookup_handler(command->command);
 		return handler->handler(command);    
 	} else {
-    return RESULT_FAIL_MATCH;	  
+    return SHELL_RESULT_FAIL_MATCH;	  
 	}
 }
 
@@ -217,7 +217,7 @@ static void tokenise(char* cmd_copy, char** tokens, uint8_t tokens_length) {
 }
 
 static void handle_failure(shell_result result, const char* command) {
-	if (result == RESULT_FAIL_MATCH) {
+	if (result == SHELL_RESULT_FAIL_MATCH) {
     PGM_STR(SHELL_UNKNOWN_COMMAND, unknown_cmd)
   	shell_printf(unknown_cmd, command);		
   } else {

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <avr/interrupt.h>
 
 #include "unity.h"
 

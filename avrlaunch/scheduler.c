@@ -127,7 +127,7 @@ struct task* scheduler_first_task() {
 
 static shell_result shell_main_handler(shell_command* command) {
 	PGM_STR(SCHEDULER_SHELL_SCHED, sched);
-	result result = SHELL_RESULT_FAIL;
+	shell_result result = SHELL_RESULT_FAIL;
 	if (strcmp(command->command, sched) == 0) {
 		for (uint8_t i = 0; i < SHELL_SUB_HANDLERS_COUNT && result != SHELL_RESULT_SUCCESS; i++) {
 			result = shell_sub_handlers[i](command->args, command->args_count);
