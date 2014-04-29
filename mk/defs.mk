@@ -1,6 +1,6 @@
 
 AVR_PREFIX = /opt/local/avr
-AVR_CONF = $(AVR_PREFIX)/etc/avrdude.conf 
+AVRDUDE_CONF = /opt/local/etc/avrdude.conf 
 SHELL = /bin/sh
 
 .SUFFIXES:
