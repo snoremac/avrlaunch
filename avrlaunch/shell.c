@@ -135,8 +135,8 @@ shell_result shell_invoke(const char* cmd_line) {
     return RESULT_SUCCESS;
   }
   
-	char cmd_copy[strlen(cmd_line)];
-	strncpy(cmd_copy, cmd_line, strlen(cmd_line));
+	char cmd_copy[strlen(cmd_line) + 1];
+	strncpy(cmd_copy, cmd_line, strlen(cmd_line) + 1);
 	char* tokens[token_count];
   tokenise(cmd_copy, tokens, token_count);
   
@@ -190,7 +190,7 @@ static shell_result delegating_handler(shell_command* command) {
 }
 
 static uint8_t uint8_tokens(const char* cmd_line) {
-  uint8_t cmd_length = strlen(cmd_line);
+  uint8_t cmd_length = strlen(cmd_line) + 1;
 	char cmd_copy[cmd_length];
   
 	strncpy(cmd_copy, cmd_line, cmd_length);
