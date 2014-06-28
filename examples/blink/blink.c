@@ -22,7 +22,7 @@ static void flip_led_task(struct task* task);
 static shell_result blink_shell_handler(shell_command* command);
 
 void setup_task(struct task* task) {
-	led_gpio = GPIO(PORTD, PIN6);
+	led_gpio = GPIO(PORTB, PIN5);
 	button_gpio = GPIO(PORTD, PIN2);
 
 	gpio_set_input(&button_gpio);
