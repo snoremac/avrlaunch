@@ -12,7 +12,7 @@
 
 struct thing {
 	double id;
-	char id_str[3];
+	char id_str[10];
 };
 
 static struct thing to_thing(uint8_t id);
@@ -119,6 +119,7 @@ void test_unused_elements_are_zero() {
 
 static struct thing to_thing(uint8_t id) {
 	struct thing thing;
+	memset(&thing, 0, sizeof(struct thing));
 	thing.id = id;
 	dtostrf(thing.id, 3, 1, thing.id_str);
 	return thing;
