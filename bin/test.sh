@@ -8,7 +8,7 @@ outfile=/tmp/avrlaunch-$RANDOM.txt
 $PROJECT_DIR/bin/symlink-arduino.sh
 
 for group in BUFFER SCHEDULER,SHELL EVENT BUFFER_EVENT,GPIO_EVENT; do
-  make -s clean test program TEST=$group
+  make -s clean test program TEST=$group UART_BAUD=9600
   $PROJECT_DIR/bin/test-serial.rb > $outfile
   if [ $? != 0 ]; then
 	  echo "Tests FAILED"
