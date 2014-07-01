@@ -6,9 +6,88 @@
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/hal/hal_wave.h"
 
-static volatile amplitude_callback next_amplitude;  
+static wave_input_capture_callback on_input_capture;
+static wave_duty_cycle_callback next_duty_cycle;
+static wave_edge current_capture_edge;
 
-void wave_timer_init() {
+void wave_in_timer_init() {
+	// Timer 1
+	// Normal mode, TOP at 0xFFFF
+	clear_bit(&TCCR1A, WGM10);
+	clear_bit(&TCCR1A, WGM11);
+	clear_bit(&TCCR1B, WGM12);
+	clear_bit(&TCCR1B, WGM13);
+
+	// Prescaler of 1024
+	set_bit(&TCCR1B, CS10);
+	clear_bit(&TCCR1B, CS11);
+	set_bit(&TCCR1B, CS12);
+	
+	// Set pin B0 as output
+	clear_bit(&DDRB, PIN0);
+}
+
+void wave_in_timer_on(wave_input_capture_callback callback, wave_edge capture_edge) {
+  on_input_capture = callback;
+  current_capture_edge = capture_edge;
+
+  if (current_capture_edge == WAVE_EDGE_FALLING) {
+  	// Input capture on falling edge
+  	clear_bit(&TCCR1B, ICES1);    
+  } else {
+  	// Input capture on rising edge
+  	set_bit(&TCCR1B, ICES1);        
+  }
+
+	// Enable input capture interrupt
+	set_bit(&TIMSK1, ICIE1);  
+}
+
+void wave_in_timer_off() {
+	// Disable input capture interrupt
+	clear_bit(&TIMSK1, ICIE1);    
+}
+
+void wave_in_timer_reset() {
+  if (current_capture_edge == WAVE_EDGE_FALLING) {
+  	// Input capture on falling edge
+  	clear_bit(&TCCR1B, ICES1);    
+  } else {
+  	// Input capture on rising edge
+  	set_bit(&TCCR1B, ICES1);        
+  }
+
+	// Reset counter to zero
+	TCNT1H = 0;
+	TCNT1L = 0;		
+}
+
+uint16_t wave_in_current_tick() {
+	uint8_t timer_low = TCNT1L;
+	uint8_t timer_high = TCNT1H;
+	return (timer_high << 8) | timer_low;
+}
+
+ISR(TIMER1_CAPT_vect) {
+	uint8_t timer_low = TCNT1L;
+	uint8_t timer_high = TCNT1H;
+	
+  if (current_capture_edge == WAVE_EDGE_BOTH) {
+  	// Toggle input capture edge selection
+  	toggle_bit(&TCCR1B, ICES1);
+
+  	// Reset input capture interrupt flag
+  	set_bit(&TIFR1, ICF1);
+  }
+	
+  on_input_capture((timer_high << 8) | timer_low);
+
+	// Reset counter to zero
+	TCNT1H = 0;
+	TCNT1L = 0;
+}
+
+void wave_out_timer_init() {
   // Timer 3
   // Prescale 1
   set_bit(&TCCR3B, CS30);
@@ -25,8 +104,8 @@ void wave_timer_init() {
 	set_bit(&DDRC, PIN6);
 }
 
-void wave_timer_on(amplitude_callback callback) {
-	next_amplitude = callback;
+void wave_out_timer_on(wave_duty_cycle_callback callback) {
+	next_duty_cycle = callback;
 	
 	// Timer 3
 	// Set output compare A to zero
@@ -37,19 +116,20 @@ void wave_timer_on(amplitude_callback callback) {
 	set_bit(&TCCR3A, COM3A1);
 
   // Enable interrupt
-  set_bit(&TIMSK2, TOIE2);
+  set_bit(&TIMSK3, TOIE3);
 }
 
-void wave_timer_off() {
+void wave_out_timer_off() {
   // Timer 2
 	// Disconnect output compare A
-	clear_bit(&TCCR2A, COM2A0);
-	clear_bit(&TCCR2A, COM2A1);
+	clear_bit(&TCCR3A, COM3A0);
+	clear_bit(&TCCR3A, COM3A1);
 
   // Disable interrupt
   clear_bit(&TIMSK3, TOIE3);
 }
 
 ISR(TIMER3_OVF_vect) {
-	OCR3A = next_amplitude();
+	OCR3AH = 0;
+	OCR3AL = next_duty_cycle();
 }

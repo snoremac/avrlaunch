@@ -6,7 +6,7 @@
 
 #include "avrlaunch/avrlaunch.h"
 #include "avrlaunch/log.h"
-#include "avrlaunch/hal/atmega328p/hal_clock.h"
+#include "avrlaunch/hal/atmega32u4/hal_clock.h"
 
 static uint8_t overflows;
 

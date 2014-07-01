@@ -38,8 +38,8 @@ static uint8_t triangle_converter(uint8_t phase_position);
 static uint8_t next_amplitude_callback(void);
 
 void wave_init() {
-  wave_timer_init();
-  wave_off();
+  wave_out_timer_init();
+  wave_out_timer_off();
 }
 
 void wave_on(waveform_type waveform, float hertz) {
@@ -61,11 +61,11 @@ void wave_on(waveform_type waveform, float hertz) {
   phase_accumulator = 0;
   tuning_word = pow(2, 32) * hertz / (F_CPU / 510);
 
-  wave_timer_on(next_amplitude_callback);
+  wave_out_timer_on(next_amplitude_callback);
 }
 
 void wave_off() {
-  wave_timer_off();
+  wave_out_timer_off();
 }
 
 static uint8_t next_amplitude_callback(void) {

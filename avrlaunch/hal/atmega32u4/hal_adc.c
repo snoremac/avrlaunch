@@ -7,7 +7,7 @@
 #include "avrlaunch/log.h"
 #include "avrlaunch/shell.h"
 #include "avrlaunch/pgmspace/pgm_strings.h"
-#include "avrlaunch/hal/atmega328p/hal_adc.h"
+#include "avrlaunch/hal/atmega32u4/hal_adc.h"
 
 #define NO_DUMMY -1
 

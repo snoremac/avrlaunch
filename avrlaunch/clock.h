@@ -5,9 +5,6 @@
 
 #include "avrlaunch/avrlaunch.h"
 
-#define CLOCK_TIMER 0
-#define CLOCK_ISR_VECT TIMER_0_OVERFLOW_VECT
-
 void clock_init(void);
 
 time clock_get_time(void);
