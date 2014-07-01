@@ -12,7 +12,7 @@ CC = avr-gcc
 AR = avr-ar
 OBJCOPY = avr-objcopy
 
-MCU ?= atmega328p
+MCU ?= atmega32u4
 FREQ = 16000000L
 
 LOG_LEVEL ?= 2

@@ -25,6 +25,10 @@ AVR_MCU(F_CPU, "atmega328p");
 int main() {
   wdt_disable();
 
+  #ifdef USBCON
+    clear_bit(&USBCON, USBE);
+  #endif 
+
   adc_init();
 	clock_init();
 	scheduler_init();
