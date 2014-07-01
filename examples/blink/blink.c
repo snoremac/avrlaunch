@@ -22,7 +22,11 @@ static void flip_led_task(struct task* task);
 static shell_result blink_shell_handler(shell_command* command);
 
 void setup_task(struct task* task) {
+#if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega328__)
 	led_gpio = GPIO(PORTB, PIN5);
+#elif defined (__AVR_ATmega32U4__)
+	led_gpio = GPIO(PORTC, PIN7);
+#endif	
 	button_gpio = GPIO(PORTD, PIN2);
 
 	gpio_set_input(&button_gpio);

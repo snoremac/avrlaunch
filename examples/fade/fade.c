@@ -36,12 +36,13 @@ uint8_t brightness_down_task_id;
 uint8_t light_off_task_id;
 
 void setup_task(struct task* task) {
-	led_gpio = GPIO(PORTD, PIN6);
 #if defined (__AVR_ATmega328P__) || defined (__AVR_ATmega328__)
+	led_gpio = GPIO(PORTD, PIN6);
 	led_gpio_timer = GPIO_TIMER(PORTD, PIN6);
-#elif defined (__AVR_ATmega32U4__) || defined (__AVR_ATmega32U4__)
+#elif defined (__AVR_ATmega32U4__)
+	led_gpio = GPIO(PORTD, PIN0);
 	led_gpio_timer = GPIO_TIMER(PORTD, PIN0);
-#endif	
+#endif
 	button_gpio = GPIO(PORTD, PIN2);
 
 	configure_timer();
