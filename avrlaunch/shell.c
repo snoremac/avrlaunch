@@ -10,12 +10,8 @@
 #include "avrlaunch/buffer/buffer_int.h"
 #include "avrlaunch/pgmspace/pgm_strings.h"
 #include "avrlaunch/event/buffer_event.h"
-#include "avrlaunch/hal/hal_uart.h"
 
-static int uart_sgetc(FILE *stream);
-static int uart_sputc(char c, FILE *stream);
-
-static bool on_uart_buffer_event(event* e);
+static bool on_buffer_event(event* e);
 static void on_char(char c);
 static void on_char_return();
 static void on_char_backspace();
@@ -28,8 +24,7 @@ static shell_command new_shell_command(char** tokens, uint8_t token_count);
 static void handle_failure(shell_result result, const char* command);
   	
 static shell_result delegating_handler(shell_command* command);
-
-FILE uart_stream = FDEV_SETUP_STREAM(uart_sputc, uart_sgetc, _FDEV_SETUP_RW);
+static FILE* output_stream;
 
 static shell_handler default_handler = {
   .command = "",
@@ -43,38 +38,27 @@ static shell_state current_shell_state = {
 static char command_buffer[SHELL_CMD_MAX_LENGTH];
 static uint8_t curr_index = 0;
 
-void shell_init() {
+void shell_init(struct buffer* input_buffer, FILE* stream) {
+  output_stream = stream;
+  buffer_event_add_listener(input_buffer, on_buffer_event);
+
   shell_handler_init();
-
 	memset(command_buffer, '\0', SHELL_CMD_MAX_LENGTH);
-
-  uart_enable(UART_BAUD);
-  buffer_event_add_listener(get_uart_buffer(), on_uart_buffer_event);
-  
 	print_prompt();
 }
 
 void shell_printf(const char* format, ...) {
 	va_list args;
 	va_start(args, format);
-	vfprintf(&uart_stream, format, args);
+	vfprintf(output_stream, format, args);
 	va_end(args);
 }
 
-FILE* shell_get_stream(void) {
-  return &uart_stream;
+FILE* shell_get_stream() {
+  return output_stream;
 }
 
-static int uart_sgetc(FILE *stream) {
-  return 0;
-}
-
-static int uart_sputc(char c, FILE *stream) {
-  uart_putc(c);
-  return 0;
-}
-
-static bool on_uart_buffer_event(event* event) {
+static bool on_buffer_event(event* event) {
   if (event-> flags & BUFFER_HOLDING) {
   	char c = buffer_shift_uint8((struct buffer*) event->descriptor.address);
   	if (c != 0) {
@@ -92,7 +76,7 @@ static bool on_uart_buffer_event(event* event) {
 }
 
 static void on_char(char c) {
-	uart_putc(c);
+	fputc(c, output_stream);
 	if (curr_index < SHELL_CMD_MAX_LENGTH - 1) {
 		command_buffer[curr_index] = c;
 		command_buffer[curr_index + 1] = '\0';
@@ -101,7 +85,8 @@ static void on_char(char c) {
 }
 
 static void on_char_return() {
-	uart_putc('\n');
+	fputc('\r', output_stream);
+	fputc('\n', output_stream);
 	if (curr_index < SHELL_CMD_MAX_LENGTH - 1) {
 		shell_invoke(command_buffer);        
   } else {
@@ -116,9 +101,9 @@ static void on_char_return() {
 
 static void on_char_backspace() {
   if (curr_index > 0) {
-		uart_putc('\b');
-		uart_putc(' ');
-		uart_putc('\b');
+	  fputc('\b', output_stream);
+	  fputc(' ', output_stream);
+	  fputc('\b', output_stream);
 		command_buffer[curr_index - 1] = '\0';
     curr_index--;        
   }  

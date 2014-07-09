@@ -73,9 +73,12 @@ void buffer_dump(struct buffer* buffer, element_print_handler handler, FILE* str
       fputc(',', stream);
     }
     if ((i + 1) % 25 == 0) {
+      fputc('\r', stream);
       fputc('\n', stream);
     }
   }
+  fputc('\r', stream);
   fputc('\n', stream);
+  fputc('\r', stream);
   fputc('\n', stream);
 }

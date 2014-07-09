@@ -4,6 +4,7 @@
 #include <string.h>
 #define __DELAY_BACKWARD_COMPATIBLE__ 
 #include <util/delay.h>
+#include <avr/interrupt.h>
 #include <avr/sfr_defs.h>
 #include <avr/wdt.h>
 
@@ -16,25 +17,36 @@
 #include "avrlaunch/hal/hal_adc.h"
 #include "avrlaunch/hal/hal_gpio.h"
 #include "avrlaunch/hal/hal_uart.h"
+#include "avrlaunch/usb.h"
 
 #ifdef SIM
 #include "avr/avr_mcu_section.h"
 AVR_MCU(F_CPU, "atmega328p");
 #endif
 
+static FILE* shell_output_stream;
+
 int main() {
   wdt_disable();
 
-  #ifdef USBCON
-    clear_bit(&USBCON, USBE);
-  #endif 
-
-  adc_init();
 	clock_init();
 	scheduler_init();
 	event_init();
   buffer_event_init();
-	shell_init();
+
+  adc_init();
+  uart_enable(UART_BAUD);
+
+  struct buffer* shell_input_buffer = NULL;
+  #ifdef USBCON
+  usb_init();
+  shell_input_buffer = usb_get_buffer();
+  shell_output_stream = usb_get_output_stream();
+  #else
+  shell_input_buffer = uart_get_buffer();
+  shell_output_stream = FDEV_SETUP_STREAM(uart_fputc, NULL, _FDEV_SETUP_WRITE);
+  #endif
+	shell_init(shell_input_buffer, shell_output_stream);
 
   struct task_config setup_config = { "setup", TASK_ONCE, TASK_ASAP };
 	scheduler_add_task(&setup_config, setup_task, NULL);

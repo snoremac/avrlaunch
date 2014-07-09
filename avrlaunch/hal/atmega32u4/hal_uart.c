@@ -107,19 +107,17 @@ void uart_disable() {
 	SREG = oldSREG;
 }
 
-void uart_putc(char c) {
-	if (c == '\n') {
-		uart_putc('\r');
-	}
-	uart_putc_raw(c);
+int uart_fputc(FILE* stream, char c) {
+	uart_putc(c);
+	return 0;
 }
 
-void uart_putc_raw(char c) {
+void uart_putc(char c) {
 	loop_until_bit_is_set(UCSR1A, UDRE1);
 	UDR1 = c;
 }
 
-struct buffer* get_uart_buffer(void) {
+struct buffer* uart_get_buffer(void) {
 	return &uart_buffer;
 }
 

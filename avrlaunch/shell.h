@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "avrlaunch/avrlaunch.h"
+#include "avrlaunch/buffer/buffer.h"
 
 #ifndef SHELL_CMD_MAX_LENGTH
 #define SHELL_CMD_MAX_LENGTH 16
@@ -41,7 +42,7 @@ typedef struct shell_state {
 	bool modal;
 } shell_state;
 
-void shell_init();
+void shell_init(struct buffer* input_buffer, FILE* output_stream);
 
 void shell_printf(const char* format, ...);
 
