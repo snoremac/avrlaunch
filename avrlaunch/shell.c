@@ -59,18 +59,21 @@ FILE* shell_get_stream() {
 }
 
 static bool on_buffer_event(event* event) {
-  if (event-> flags & BUFFER_HOLDING) {
-  	char c = buffer_shift_uint8((struct buffer*) event->descriptor.address);
-  	if (c != 0) {
-    	if (c == '\n') {
-        on_char_return();
-      } else if (c == '\b') {
-        on_char_backspace();
-  		} else {
-        on_char(c);
-  		}
-  	}
-    
+  if (event-> flags & BUFFER_HOLDING || event-> flags & BUFFER_FULL) {
+    struct buffer* buffer = (struct buffer*) event->descriptor.address;
+    while (buffer->element_count > 0) {
+    	char c = buffer_shift_uint8(buffer);
+    	if (c != 0) {
+      	if (c == '\n') {
+          on_char_return();
+        } else if (c == '\b') {
+          on_char_backspace();
+    		} else {
+          on_char(c);
+    		}
+      }
+      
+    }
   }
 	return true;
 }
