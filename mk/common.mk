@@ -42,7 +42,7 @@
 .PHONY: program
 program :
 	# Via USB + bootloader
-	$(AVRLAUNCH_HOME)/bin/kill_minicom.sh
+	$(AVRLAUNCH_HOME)/bin/pre-program.sh
 	avrdude -F -D -C $(AVRDUDE_CONF) -p $(MCU) -P $(AVRLAUNCH_HOME)/tty.mcu -c avr109 -b 57600 -U flash:w:firmware.hex:i
 
 	# Via AVR ISP mkII

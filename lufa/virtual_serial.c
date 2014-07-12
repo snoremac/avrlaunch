@@ -1,4 +1,9 @@
 
+#include <avr/interrupt.h>
+#include <avr/wdt.h>
+#define __DELAY_BACKWARD_COMPATIBLE__ 
+#include <util/delay.h>
+
 #include <LUFA/Drivers/Board/LEDs.h>
 #include <LUFA/Drivers/Board/Joystick.h>
 #include <LUFA/Drivers/USB/USB.h>
@@ -51,6 +56,18 @@ void virtual_serial_task() {
 int virtual_serial_fputc(char c, FILE* stream) {
 	CDC_Device_SendByte(&cdc_interface, c);
 	return 0;	
+}
+
+void EVENT_CDC_Device_ControLineStateChanged(USB_ClassInfo_CDC_Device_t *const interface_info) {
+	if (interface_info->State.LineEncoding.BaudRateBPS == 1200) {
+		if ((interface_info->State.ControlLineStates.HostToDevice & CDC_CONTROL_LINE_OUT_DTR) == 0) {
+			*(uint16_t *)0x0800 = 0x7777;
+ 			USB_Disable();
+    	cli();
+			_delay_ms(1000);
+    	wdt_enable(WDTO_120MS);
+		}
+	}	
 }
 
 void EVENT_USB_Device_ConfigurationChanged(void) {
